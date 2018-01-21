@@ -18,3 +18,7 @@ class Bubble:
 
     def draw(self):
         self.__surface.blit(self.__sprite, self.__surface)
+
+    def move(self, pos):
+        # TODO: implement this.  it needs to animate a move,
+        # so start, stop, step, and dest need to be accounted for
