@@ -7,7 +7,7 @@ class Bubble:
         assert isinstance(color, str)
         assert isinstance(size, int)
         assert isinstance(position, tuple)
-        assert isinstance(surface, pygame.Surface)
+        assert isinstance(surface, pygame.SurfaceType)
 
         self.color = color
         self.size = size
