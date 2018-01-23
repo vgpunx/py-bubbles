@@ -16,5 +16,5 @@ class Playfield:
             self.map.append([0 for x in range(width)])
             
     
-    def draw(self):
+    #def draw(self):
         # TODO: blit the background image to the imported surface
