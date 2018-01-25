@@ -19,6 +19,8 @@ class Map(object):
         # Map size
         self.rows = rows
         self.cols = cols
+        self.cells = self.cells()
+        self.units = {}
 
     def __str__(self):
         return "Map (%d, %d)" % (self.rows, self.cols)
@@ -94,15 +96,15 @@ class Map(object):
             bottom = "\\"
 
             for col in range(self.cols):
-                #				unit = "U" if units and self.positions.get( ( row + col / 2, col ) ) else ""
+                # unit = "U" if units and self.positions.get( ( row + col / 2, col ) ) else ""
                 if col % 2 == 0:
                     text = "%d,%d" % (row + col / 2, col) if numbers else ""
-                    top += (text).center(text_length) + "\\"
-                    bottom += ("").center(text_length, '_') + "/"
+                    top += text.center(text_length) + "\\"
+                    bottom += "".center(text_length, '_') + "/"
                 else:
                     text = "%d,%d" % (1 + row + col / 2, col) if numbers else " "
-                    top += ("").center(text_length, '_') + "/"
-                    bottom += (text).center(text_length) + "\\"
+                    top += "".center(text_length, '_') + "/"
+                    bottom += text.center(text_length) + "\\"
             # Clean up tail slashes on even numbers of columns
             if self.cols % 2 == 0:
                 if row == 0: top = top[:-1]
