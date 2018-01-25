@@ -166,7 +166,7 @@ class RenderFog( Render ):
 
 		self.fill( self.OBSCURED )
 
-		for cell in self.map.cells():
+		for cell in self.map.cells:
 			row, col = cell
 			surface = self.get_cell( cell )
 
