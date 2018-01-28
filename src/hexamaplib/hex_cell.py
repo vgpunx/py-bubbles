@@ -1,10 +1,15 @@
-import sys, collections, math
+import collections
+import math
+import sys
+import pygame
 
 Point = collections.namedtuple("Point", ["x", "y"])
 CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
 
+
 # Definition of Orientation and Layout named tuples for reference only:
-#     Orientation = collections.namedtuple("Orientation", ["f0", "f1", "f2", "f3", "b0", "b1", "b2", "b3", "start_angle"])
+#     Orientation = collections.namedtuple("Orientation",
+#           ["f0", "f1", "f2", "f3", "b0", "b1", "b2", "b3", "start_angle"])
 #     Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
 #
 # These are used in a few of the functions in this class, but they are intended to be passed in from a HexMap object.
@@ -43,7 +48,7 @@ class HexCell(object):
             corners.append(Point(center.x + offset.x, center.y + offset.y))
         return corners
 
-    def __polygon_corner_offset__(layout, corner):
+    def __polygon_corner_offset__(self, layout, corner):
         """
         Calculate polygon corner offset from center.
         :param layout: Named tuple with 3 fields.
@@ -86,19 +91,20 @@ class HexCell(object):
         r = M.b2 * pt.x + M.b3 * pt.y
         return CubeCoord(q, r, -q - r)
 
-    @classmethod
-    def paint(cls, surface, color="#FFFFFFFF", width=2):
+    def paint(self, surface, color='black', width=2):
         """
         Method to paint a representation of the cell to a provided pygame surface.
         As currently written this is intended primarily for debugging.
         :surface: Pass in the object of class pygame.Surface to blit to.
         """
         if 'pygame' not in sys.modules:
-            import pygame
+            from pygame import Color, draw
 
-        pygame.draw.polygon(
+        cell = draw.polygon(
             surface,
-            pygame.Color(color),
-            cls.__polygon_corners__(cls, cls.__layout, cls.cubepos),
+            Color(color),
+            self.__polygon_corners__(self.__layout, self.cubepos),
             width
         )
+
+        surface.blit(cell)

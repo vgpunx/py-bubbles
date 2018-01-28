@@ -6,12 +6,10 @@ from map import Grid
 SQRT3 = math.sqrt(3)
 
 
-
-
 class Render(pygame.Surface):
     __metaclass__ = ABCMeta
 
-    def __init__(self, hxmap, radius=24, start_angle=0.0, *args, **keywords):
+    def __init__(self, hxmap, radius=24, *args, **keywords):
         self.hxmap = hxmap
         self.radius = radius
 
