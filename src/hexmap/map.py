@@ -28,7 +28,7 @@ class Map(object):
     @property
     def size(self):
         """Returns the size of the grid as a tuple (row, col)"""
-        return (self.rows, self.cols)
+        return self.rows, self.cols
 
     @classmethod
     def distance(self, start, destination):
