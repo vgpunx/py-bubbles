@@ -1,41 +1,81 @@
-import math, collections
-
-Orientation = collections.namedtuple("Orientation", ["f0", "f1", "f2", "f3", "b0", "b1", "b2", "b3", "start_angle"])
-Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
-Point = collections.namedtuple("Point", ["x", "y"])
-CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
+import math, collections, pygame
 
 
 # TODO: Implement a HexMap class, incorporate the below methods, and write the damn docstrings
-class HexMap(dict):
-# emmm might not want to derive from dict here.  need more thought on this
-    def __init__(self, **kwargs: _VT) -> None:
-        super().__init__(**kwargs)
+class HexMap:
+
+    Orientation = collections.namedtuple("Orientation", ["f0", "f1", "f2", "f3", "b0", "b1", "b2", "b3", "start_angle"])
+    Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
+    Point = collections.namedtuple("Point", ["x", "y"])
+    CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
+
+    def __init__(self, pixelsize_x, pixelsize_y, orientation='flat'):
+        Orientation = collections.namedtuple("Orientation",
+                                             ["f0", "f1", "f2", "f3", "b0", "b1", "b2", "b3", "start_angle"])
+        Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
+        Point = collections.namedtuple("Point", ["x", "y"])
+        CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
+
+        self.pixelsize = (pixelsize_x, pixelsize_y)
+        self.area = pixelsize_x * pixelsize_y
+
+        if orientation == 'flat':
+            self.layout = Orientation(
+                3.0 / 2.0,
+                0.0,
+                math.sqrt(3.0) / 2.0,
+                math.sqrt(3.0),
+                2.0 / 3.0,
+                0.0,
+                -1.0 / 3.0,
+                math.sqrt(3.0) / 3.0,
+                0.0
+            )
+        elif orientation == 'pointy':
+            self.layout = Orientation(
+                math.sqrt(3.0),
+                math.sqrt(3.0) / 2.0,
+                0.0,
+                3.0 / 2.0,
+                math.sqrt(3.0) / 3.0,
+                -1.0 / 3.0,
+                0.0,
+                2.0 / 3.0,
+                0.5
+            )
+        else:
+            raise Exception('You must specify flat-topped or pointy-topped hexagons.')
+
+        # Rows and columns are diagonal in the axial and cube coordinate system.
+        # It might be easier in this instance to convert to offset rows long enough to populate the grid.
+        self.hexradius = math.sqrt(pixelsize_x ** 2 + pixelsize_y ** 2)
+
+        self.surface = pygame.Surface(self.pixelsize)
 
 
-layout_pointy = Orientation(
-    math.sqrt(3.0), 
-    math.sqrt(3.0) / 2.0, 
-    0.0, 
-    3.0 / 2.0, 
-    math.sqrt(3.0) / 3.0, 
-    -1.0 / 3.0, 
-    0.0, 
-    2.0 / 3.0, 
-    0.5
-)
-
-layout_flat = Orientation(
-    3.0 / 2.0, 
-    0.0, 
-    math.sqrt(3.0) / 2.0, 
-    math.sqrt(3.0), 
-    2.0 / 3.0, 
-    0.0, 
-    -1.0 / 3.0, 
-    math.sqrt(3.0) / 3.0, 
-    0.0
-)
+# layout_pointy = Orientation(
+#     math.sqrt(3.0),
+#     math.sqrt(3.0) / 2.0,
+#     0.0,
+#     3.0 / 2.0,
+#     math.sqrt(3.0) / 3.0,
+#     -1.0 / 3.0,
+#     0.0,
+#     2.0 / 3.0,
+#     0.5
+# )
+#
+# layout_flat = Orientation(
+#     3.0 / 2.0,
+#     0.0,
+#     math.sqrt(3.0) / 2.0,
+#     math.sqrt(3.0),
+#     2.0 / 3.0,
+#     0.0,
+#     -1.0 / 3.0,
+#     math.sqrt(3.0) / 3.0,
+#     0.0
+# )
 
 
 def hex_add(a, b):
