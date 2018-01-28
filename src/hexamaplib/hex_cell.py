@@ -1,5 +1,4 @@
-import collections, math
-from abc import ABCMeta, abstractclassmethod
+import sys, collections, math
 
 Point = collections.namedtuple("Point", ["x", "y"])
 CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
@@ -9,6 +8,7 @@ CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
 #     Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
 #
 # These are used in a few of the functions in this class, but they are intended to be passed in from a HexMap object.
+
 
 class HexCell(object):
 
@@ -25,15 +25,19 @@ class HexCell(object):
         """
         return self.__cube_to_pixel__(self.__layout, self.cubepos)
 
-    def __polygon_corners__(self, layout, hex):
+    def set_pos(self, x, y) -> None:
+        self.axialpos = Point(x, y)
+        self.cubepos = CubeCoord(x, y, -x - y)
+
+    def __polygon_corners__(self, layout, cubecoord):
         """
         Calculate the polygon corners of a hex object in PIXEL COORDINATES.
         :param layout:  Named tuple with 3 fields.
-        :param hex: Named tuple with (q, r, s) fields.
+        :param cubecoord: Named tuple with (q, r, s) fields.
         :return: Point list.
         """
         corners = []
-        center = self.__cube_to_pixel__(layout, hex)
+        center = self.__cube_to_pixel__(layout, cubecoord)
         for i in range(0, 6):
             offset = self.__polygon_corner_offset__(layout, i)
             corners.append(Point(center.x + offset.x, center.y + offset.y))
@@ -52,18 +56,18 @@ class HexCell(object):
         return Point(size.x * math.cos(angle), size.y * math.sin(angle))
 
     @staticmethod
-    def __cube_to_pixel__(layout, hex):
+    def __cube_to_pixel__(layout, cubecoord):
         """
         Convert cube hex coordinates to pixel position.
         :param layout: Named tuple with 3 fields.
-        :param hex: Named tuple with q, r, s fields.
+        :param cubecoord: Named tuple with q, r, s fields.
         :return: Returns Point named tuple.
         """
         M = layout.orientation
         size = layout.size
         origin = layout.origin
-        x = (M.f0 * hex.q + M.f1 * hex.r) * size.x
-        y = (M.f2 * hex.q + M.f3 * hex.r) * size.y
+        x = (M.f0 * cubecoord.q + M.f1 * cubecoord.r) * size.x
+        y = (M.f2 * cubecoord.q + M.f3 * cubecoord.r) * size.y
         return Point(x + origin.x, y + origin.y)
 
     @staticmethod
@@ -82,9 +86,19 @@ class HexCell(object):
         r = M.b2 * pt.x + M.b3 * pt.y
         return CubeCoord(q, r, -q - r)
 
-    @abstractclassmethod
-    def paint(self, surface):
+    @classmethod
+    def paint(cls, surface, color="#FFFFFFFF", width=2):
         """
-        Abstract method to blit the image representing this object to a pygame Surface.
+        Method to paint a representation of the cell to a provided pygame surface.
+        As currently written this is intended primarily for debugging.
+        :surface: Pass in the object of class pygame.Surface to blit to.
         """
-        pass
+        if 'pygame' not in sys.modules:
+            import pygame
+
+        pygame.draw.polygon(
+            surface,
+            pygame.Color(color),
+            cls.__polygon_corners__(cls, cls.__layout, cls.cubepos),
+            width
+        )

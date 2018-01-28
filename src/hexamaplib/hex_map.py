@@ -5,9 +5,10 @@ Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
 Point = collections.namedtuple("Point", ["x", "y"])
 CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
 
+
 # TODO: Implement a HexMap class, incorporate the below methods, and write the damn docstrings
 class HexMap(dict):
-
+# emmm might not want to derive from dict here.  need more thought on this
     def __init__(self, **kwargs: _VT) -> None:
         super().__init__(**kwargs)
 
@@ -36,37 +37,52 @@ layout_flat = Orientation(
     0.0
 )
 
+
 def hex_add(a, b):
     return CubeCoord(a.q + b.q, a.r + b.r, a.s + b.s)
+
 
 def hex_subtract(a, b):
     return CubeCoord(a.q - b.q, a.r - b.r, a.s - b.s)
 
+
 def hex_scale(a, k):
     return CubeCoord(a.q * k, a.r * k, a.s * k)
+
 
 def hex_rotate_left(a):
     return CubeCoord(-a.s, -a.q, -a.r)
 
+
 def hex_rotate_right(a):
     return CubeCoord(-a.r, -a.s, -a.q)
 
+
 hex_directions = [CubeCoord(1, 0, -1), CubeCoord(1, -1, 0), CubeCoord(0, -1, 1), CubeCoord(-1, 0, 1), CubeCoord(-1, 1, 0), CubeCoord(0, 1, -1)]
+
+
 def hex_direction(direction):
     return hex_directions[direction]
+
 
 def hex_neighbor(hex, direction):
     return hex_add(hex, hex_direction(direction))
 
+
 hex_diagonals = [CubeCoord(2, -1, -1), CubeCoord(1, -2, 1), CubeCoord(-1, -1, 2), CubeCoord(-2, 1, 1), CubeCoord(-1, 2, -1), CubeCoord(1, 1, -2)]
+
+
 def hex_diagonal_neighbor(hex, direction):
     return hex_add(hex, hex_diagonals[direction])
+
 
 def hex_length(hex):
     return (abs(hex.q) + abs(hex.r) + abs(hex.s)) // 2
 
+
 def hex_distance(a, b):
     return hex_length(hex_subtract(a, b))
+
 
 def hex_round(h):
     q = int(round(h.q))
@@ -84,8 +100,10 @@ def hex_round(h):
             s = -q - r
     return CubeCoord(q, r, s)
 
+
 def hex_lerp(a, b, t):
     return CubeCoord(a.q * (1 - t) + b.q * t, a.r * (1 - t) + b.r * t, a.s * (1 - t) + b.s * t)
+
 
 def hex_linedraw(a, b):
     N = hex_distance(a, b)
