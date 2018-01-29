@@ -1,7 +1,6 @@
 import collections
 import math
 import sys
-import pygame
 
 Point = collections.namedtuple("Point", ["x", "y"])
 CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
@@ -17,18 +16,18 @@ CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
 
 class HexCell(object):
 
-    def __init__(self, pos_x, pos_y, radius, layout) -> None:
+    def __init__(self, pos_x, pos_y, layout) -> None:
         super().__init__()
         self.axialpos = Point(pos_x, pos_y)
         self.cubepos = CubeCoord(pos_x, pos_y, -pos_x - pos_y)
-        self.radius = radius
-        self.__layout = layout
+        # self.radius = radius
+        self.layout = layout
 
     def get_pixelpos(self) -> Point:
         """
         Returns the pixel coordinate position of this object.
         """
-        return self.__cube_to_pixel__(self.__layout, self.cubepos)
+        return self.__cube_to_pixel__(self.layout, self.cubepos)
 
     def set_pos(self, x, y) -> None:
         self.axialpos = Point(x, y)
@@ -103,7 +102,7 @@ class HexCell(object):
         cell = draw.polygon(
             surface,
             Color(color),
-            self.__polygon_corners__(self.__layout, self.cubepos),
+            self.__polygon_corners__(self.layout, self.cubepos),
             width
         )
 
