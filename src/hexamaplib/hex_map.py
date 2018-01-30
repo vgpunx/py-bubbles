@@ -14,18 +14,19 @@ class HexMap:
         :param hex_orientation: -> str
         """
 
-        Orientation = collections.namedtuple("Orientation",
+        self.Orientation = collections.namedtuple("Orientation",
                                              ["f0", "f1", "f2", "f3", "b0", "b1", "b2", "b3", "start_angle"])
-        Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
-        Point = collections.namedtuple("Point", ["x", "y"])
-        CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
+        self.Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
+        self.Point = collections.namedtuple("Point", ["x", "y"])
+        self.CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
 
         self.pixelsize = pixelsize
         # self.area = pygame.Rect(pixelsize.x, pixelsize.y)
         self.hexcount = hexcount
+        self.hex_orientation = hex_orientation
 
         if hex_orientation == 'flat':
-            self.hex_orientation = Orientation(
+            self.hex_orientation = self.Orientation(
                 3.0 / 2.0,
                 0.0,
                 math.sqrt(3.0) / 2.0,
@@ -37,7 +38,7 @@ class HexMap:
                 0.0
             )
         elif hex_orientation == 'pointy':
-            self.hex_orientation = Orientation(
+            self.hex_orientation = self.Orientation(
                 math.sqrt(3.0),
                 math.sqrt(3.0) / 2.0,
                 0.0,
@@ -51,17 +52,15 @@ class HexMap:
         else:
             raise Exception('You must specify flat-topped or pointy-topped hexagons.')
 
-        # Rows and columns are diagonal in the axial and cube coordinate system.
-        # It might be easier in this instance to convert to offset rows long enough to populate the grid.
-        self.hexsize = Point((self.pixelsize[0] / self.hexcount[0]) / 2, (self.pixelsize[0] / self.hexcount[0]) / 2)
+        self.hexsize = self.Point((self.pixelsize[0] / self.hexcount[0] / 2),
+                                  (self.pixelsize[1] / self.hexcount[1]) / 2)
 
-        self.surface = pygame.Surface(self.pixelsize)
         self.board = self.populate_board()
 
-    Orientation = collections.namedtuple("Orientation", ["f0", "f1", "f2", "f3", "b0", "b1", "b2", "b3", "start_angle"])
-    Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
-    Point = collections.namedtuple("Point", ["x", "y"])
-    CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
+    # Orientation = collections.namedtuple("Orientation", ["f0", "f1", "f2", "f3", "b0", "b1", "b2", "b3", "start_angle"])
+    # Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
+    # Point = collections.namedtuple("Point", ["x", "y"])
+    # CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
 
     def hex_add(self, a, b):
         return self.CubeCoord(a.q + b.q, a.r + b.r, a.s + b.s)
@@ -88,7 +87,7 @@ class HexMap:
         hex_directions = [self.CubeCoord(1, 0, -1), self.CubeCoord(1, -1, 0), self.CubeCoord(0, -1, 1),
                           self.CubeCoord(-1, 0, 1), self.CubeCoord(-1, 1, 0), self.CubeCoord(0, 1, -1)]
 
-        return self.hex_add(hex, hex_directions(direction))
+        return self.hex_add(hex, hex_directions[direction])
 
     def hex_diagonal_neighbor(self, hex, direction):
         hex_diagonals = [self.CubeCoord(2, -1, -1), self.CubeCoord(1, -2, 1), self.CubeCoord(-1, -1, 2),
@@ -137,14 +136,24 @@ class HexMap:
 
     def populate_board(self):
         board = {}
-
-        for r in range(self.hexcount[1]):
-            r_offset = math.floor(r / 2)
-            for q in range(-r_offset, self.hexcount[0] - r_offset):
-                # start in 0,0 - radius
-                board['{0}, {1}'.format(str(q), str(r))] = HexCell(
-                    self.Point(q, r),
-                    self.Layout(self.hex_orientation, self.hexsize, self.Point(0, 0))
-                )
+        # r and q switch for flat or pointy
+        if self.hex_orientation == 'pointy':
+            for r in range(self.hexcount[0]):
+                r_offset = int(math.floor(r  / 2))
+                for q in range(-r_offset, (self.hexcount[1] - r_offset) - 1):
+                    # start in 0,0 + radius
+                    board['{0}, {1}'.format(str(q), str(r))] = HexCell(
+                        self.Point(q, r),
+                        self.Layout(self.hex_orientation, self.hexsize, self.Point(0 + self.hexsize[0], 0 + self.hexsize[1]))
+                    )
+        else:
+            for q in range(self.hexcount[1]):
+                q_offset = int(math.floor(q / 2))
+                for r in range(-q_offset, self.hexcount[0] - q_offset):
+                    # start in 0,0 + radius
+                    board['{0}, {1}'.format(str(q), str(r))] = HexCell(
+                        self.Point(q, r),
+                        self.Layout(self.hex_orientation, self.hexsize, self.Point(0 + self.hexsize[0], 0 + self.hexsize[1]))
+                    )
 
         return board
