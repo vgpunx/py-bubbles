@@ -1,11 +1,18 @@
 import math, collections, pygame
-from hexamaplib.hex_cell import HexCell
+from hex_cell import HexCell
 
 
 # TODO: Implement a HexMap class, incorporate the below methods, and write the damn docstrings
 class HexMap:
 
-    def __init__(self, pixelsize_x, pixelsize_y, orientation='flat'):
+    def __init__(self, pixelsize, hexcount, hex_orientation='flat'):
+
+        """
+
+        :param pixelsize: -> tuple
+        :param hexcount: -> tuple
+        :param hex_orientation: -> str
+        """
 
         Orientation = collections.namedtuple("Orientation",
                                              ["f0", "f1", "f2", "f3", "b0", "b1", "b2", "b3", "start_angle"])
@@ -13,11 +20,12 @@ class HexMap:
         Point = collections.namedtuple("Point", ["x", "y"])
         CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
 
-        self.pixelsize = (pixelsize_x, pixelsize_y)
-        self.area = pixelsize_x * pixelsize_y
+        self.pixelsize = pixelsize
+        # self.area = pygame.Rect(pixelsize.x, pixelsize.y)
+        self.hexcount = hexcount
 
-        if orientation == 'flat':
-            self.layout = Orientation(
+        if hex_orientation == 'flat':
+            self.hex_orientation = Orientation(
                 3.0 / 2.0,
                 0.0,
                 math.sqrt(3.0) / 2.0,
@@ -28,8 +36,8 @@ class HexMap:
                 math.sqrt(3.0) / 3.0,
                 0.0
             )
-        elif orientation == 'pointy':
-            self.layout = Orientation(
+        elif hex_orientation == 'pointy':
+            self.hex_orientation = Orientation(
                 math.sqrt(3.0),
                 math.sqrt(3.0) / 2.0,
                 0.0,
@@ -45,7 +53,7 @@ class HexMap:
 
         # Rows and columns are diagonal in the axial and cube coordinate system.
         # It might be easier in this instance to convert to offset rows long enough to populate the grid.
-        self.hexradius = math.sqrt(pixelsize_x ** 2 + pixelsize_y ** 2)
+        self.hexsize = Point((self.pixelsize[0] / self.hexcount[0]) / 2, (self.pixelsize[0] / self.hexcount[0]) / 2)
 
         self.surface = pygame.Surface(self.pixelsize)
         self.board = self.populate_board()
@@ -130,17 +138,13 @@ class HexMap:
     def populate_board(self):
         board = {}
 
-        for r in range(self.pixelsize[1]):
+        for r in range(self.hexcount[1]):
             r_offset = math.floor(r / 2)
-            for q in range(-r_offset, self.pixelsize[0] - r_offset):
+            for q in range(-r_offset, self.hexcount[0] - r_offset):
                 # start in 0,0 - radius
                 board['{0}, {1}'.format(str(q), str(r))] = HexCell(
-                    q, r,
-                    self.Layout(
-                        self.layout,
-                        self.Point(self.hexradius, self.hexradius),
-                        self.Point(self.hexradius, self.hexradius)
-                    )
+                    self.Point(q, r),
+                    self.Layout(self.hex_orientation, self.hexsize, self.Point(0, 0))
                 )
 
         return board
