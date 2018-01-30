@@ -1,1 +1,4 @@
-import hexamaplib.hex_map as hex_map
+from hex_map import HexMap
+
+
+__all__ = ["hex_map", "hex_cell"]

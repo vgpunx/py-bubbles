@@ -1,6 +1,7 @@
 import collections
 import math
 import sys
+import pygame
 
 Point = collections.namedtuple("Point", ["x", "y"])
 CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
@@ -16,24 +17,20 @@ CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
 
 class HexCell(object):
 
-    def __init__(self, pos_x, pos_y, layout) -> None:
+    def __init__(self, axial_coords, layout) -> None:
         super().__init__()
-        self.axialpos = Point(pos_x, pos_y)
-        self.cubepos = CubeCoord(pos_x, pos_y, -pos_x - pos_y)
-        # self.radius = radius
+        self.Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
+        self.axialpos = axial_coords
+        self.cubepos = CubeCoord(axial_coords.x, axial_coords.y, -axial_coords.x - axial_coords.y)
         self.layout = layout
 
     def get_pixelpos(self) -> Point:
         """
-        Returns the pixel coordinate position of this object.
+        Returns the pixel coordinate position of the center of this cell.
         """
         return self.__cube_to_pixel__(self.layout, self.cubepos)
 
-    def set_pos(self, x, y) -> None:
-        self.axialpos = Point(x, y)
-        self.cubepos = CubeCoord(x, y, -x - y)
-
-    def __polygon_corners__(self, layout, cubecoord):
+    def get_polygon_corners(self, layout, cubecoord):
         """
         Calculate the polygon corners of a hex object in PIXEL COORDINATES.
         :param layout:  Named tuple with 3 fields.
@@ -45,6 +42,7 @@ class HexCell(object):
         for i in range(0, 6):
             offset = self.__polygon_corner_offset__(layout, i)
             corners.append(Point(center.x + offset.x, center.y + offset.y))
+
         return corners
 
     def __polygon_corner_offset__(self, layout, corner):
@@ -57,6 +55,7 @@ class HexCell(object):
         M = layout.orientation
         size = layout.size
         angle = 2.0 * math.pi * (M.start_angle - corner) / 6
+
         return Point(size.x * math.cos(angle), size.y * math.sin(angle))
 
     @staticmethod
@@ -72,6 +71,7 @@ class HexCell(object):
         origin = layout.origin
         x = (M.f0 * cubecoord.q + M.f1 * cubecoord.r) * size.x
         y = (M.f2 * cubecoord.q + M.f3 * cubecoord.r) * size.y
+
         return Point(x + origin.x, y + origin.y)
 
     @staticmethod
@@ -88,9 +88,10 @@ class HexCell(object):
         pt = Point((pixel_coords.x - origin.x) / size.x, (pixel_coords.y - origin.y) / size.y)
         q = M.b0 * pt.x + M.b1 * pt.y
         r = M.b2 * pt.x + M.b3 * pt.y
+
         return CubeCoord(q, r, -q - r)
 
-    def paint(self, surface, color='black', width=2):
+    def paint(self, surface, color='black', width=2) -> pygame.Surface:
         """
         Method to paint a representation of the cell to a provided pygame surface.
         As currently written this is intended primarily for debugging.
@@ -102,8 +103,8 @@ class HexCell(object):
         cell = draw.polygon(
             surface,
             Color(color),
-            self.__polygon_corners__(self.layout, self.cubepos),
+            self.get_polygon_corners(self.layout, self.cubepos),
             width
         )
 
-        surface.blit(cell)
+        return surface
