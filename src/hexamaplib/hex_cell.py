@@ -1,6 +1,6 @@
 import collections
 import math
-import sys
+# import sys
 import pygame
 
 Point = collections.namedtuple("Point", ["x", "y"])
@@ -97,13 +97,8 @@ class HexCell(object):
         As currently written this is intended primarily for debugging.
         :surface: Pass in the object of class pygame.Surface to blit to.
         """
-        if 'pygame' not in sys.modules:
-            from pygame import Color, draw
 
-        cell = draw.polygon(
-            surface,
-            Color(color),
-            self.get_polygon_corners(self.layout, self.cubepos),
+        pygame.draw.polygon(surface, pygame.Color(color), self.get_polygon_corners(self.layout, self.cubepos),
             width
         )
 
