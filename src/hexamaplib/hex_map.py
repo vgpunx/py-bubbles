@@ -15,7 +15,7 @@ class HexMap:
         """
 
         self.Orientation = collections.namedtuple("Orientation",
-                                             ["f0", "f1", "f2", "f3", "b0", "b1", "b2", "b3", "start_angle"])
+                                                  ["f0", "f1", "f2", "f3", "b0", "b1", "b2", "b3", "start_angle"])
         self.Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
         self.Point = collections.namedtuple("Point", ["x", "y"])
         self.CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
@@ -52,10 +52,13 @@ class HexMap:
             raise Exception('You must specify flat-topped or pointy-topped hexagons.')
 
         self.hexsize = self.Point(hexsize[0], hexsize[1])
-        self.hexcount = self.Point(
-            math.floor(self.pixelsize[0] / self.hexsize.y),
-            math.floor(self.pixelsize[1] / self.hexsize.x)
-        )
+
+        # total width of a hex is size * 2
+        # total height of a hex is math.sqrt(3)/2 * width
+        # spacing between hexes on the horizontal axis is width
+        hexwidth = int(self.hexsize.x * 1.5)
+        hexheight = int((math.sqrt(3) / 2) * (self.hexsize.x * 2))
+        self.hexcount = self.Point(int(self.pixelsize[0] / hexwidth), int(self.pixelsize[1] / hexheight))
 
         self.board = self.populate_board()
 
@@ -137,12 +140,13 @@ class HexMap:
         if self.hex_orientation == 'pointy':
             # TODO: Fix this part, it's still not producing a rectangular map
             for r in range(self.hexcount[0]):
-                r_offset = int(math.floor(r  / 2))
+                r_offset = int(math.floor(r / 2))
                 for q in range(-r_offset, (self.hexcount[1] - r_offset) - 1):
                     # start in 0,0 + radius
                     board['{0}, {1}'.format(str(q), str(r))] = HexCell(
                         self.Point(q, r),
-                        self.Layout(self.hex_orientation, self.hexsize, self.Point(1 + self.hexsize[0], 1 + self.hexsize[1]))
+                        self.Layout(self.hex_orientation, self.hexsize,
+                                    self.Point(1 + self.hexsize[0], 1 + self.hexsize[1]))
                     )
         else:
             for q in range(self.hexcount.x):
@@ -151,7 +155,8 @@ class HexMap:
                     # start in 0,0 + radius
                     board['{0}, {1}'.format(str(q), str(r))] = HexCell(
                         self.Point(q, r),
-                        self.Layout(self.hex_orientation, self.hexsize, self.Point(0 + self.hexsize[0], 0 + self.hexsize[1]))
+                        self.Layout(self.hex_orientation, self.hexsize,
+                                    self.Point(0 + self.hexsize[0], 0 + self.hexsize[1]))
                     )
 
         return board
