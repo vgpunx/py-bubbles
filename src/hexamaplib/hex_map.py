@@ -21,7 +21,6 @@ class HexMap:
         self.CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
 
         self.pixelsize = pixelsize
-        # self.area = pygame.Rect(pixelsize.x, pixelsize.y)
         self.hexcount = hexcount
         self.hex_orientation = hex_orientation
 
@@ -37,6 +36,9 @@ class HexMap:
                 math.sqrt(3.0) / 3.0,
                 0.0
             )
+            # TODO: Fix this.  The math still isn't quite right.
+            rc = ((self.pixelsize[0] / self.hexcount[0]) / 2) * 1.29  # corner radius or width
+            ri = ((math.sqrt(3) / 2) * (self.pixelsize[1] / self.hexcount[1]) / 2) * 1.26  # side radius or height
         elif hex_orientation == 'pointy':
             self.hex_orientation = self.Orientation(
                 math.sqrt(3.0),
@@ -49,11 +51,14 @@ class HexMap:
                 2.0 / 3.0,
                 0.5
             )
+            ri = ((self.pixelsize[0] / self.hexcount[0]) / 2) * 1.29  # corner radius or width
+            rc = ((math.sqrt(3) / 2) * (self.pixelsize[1] / self.hexcount[1]) / 2) * 1.26  # side radius or height
         else:
             raise Exception('You must specify flat-topped or pointy-topped hexagons.')
 
-        self.hexsize = self.Point((self.pixelsize[0] / self.hexcount[0] / 2),
-                                  (self.pixelsize[1] / self.hexcount[1]) / 2)
+        #rc = (self.pixelsize[0] / self.hexcount[0]) / 2  # corner radius or width
+        #ri = (math.sqrt(3) / 2) * rc  # side radius or height
+        self.hexsize = self.Point(rc, ri)
 
         self.board = self.populate_board()
 
@@ -138,13 +143,14 @@ class HexMap:
         board = {}
         # r and q switch for flat or pointy
         if self.hex_orientation == 'pointy':
+            # TODO: Fix this part, it's still not producing a rectangular map
             for r in range(self.hexcount[0]):
                 r_offset = int(math.floor(r  / 2))
                 for q in range(-r_offset, (self.hexcount[1] - r_offset) - 1):
                     # start in 0,0 + radius
                     board['{0}, {1}'.format(str(q), str(r))] = HexCell(
                         self.Point(q, r),
-                        self.Layout(self.hex_orientation, self.hexsize, self.Point(0 + self.hexsize[0], 0 + self.hexsize[1]))
+                        self.Layout(self.hex_orientation, self.hexsize, self.Point(1 + self.hexsize[0], 1 + self.hexsize[1]))
                     )
         else:
             for q in range(self.hexcount[1]):
