@@ -5,12 +5,12 @@ from hex_cell import HexCell
 # TODO: Implement a HexMap class, incorporate the below methods, and write the damn docstrings
 class HexMap:
 
-    def __init__(self, pixelsize, hexcount, hex_orientation='flat'):
+    def __init__(self, pixelsize, hexsize, hex_orientation='flat'):
 
         """
 
         :param pixelsize: -> tuple
-        :param hexcount: -> tuple
+        :param hexsize: -> tuple
         :param hex_orientation: -> str
         """
 
@@ -21,7 +21,6 @@ class HexMap:
         self.CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
 
         self.pixelsize = pixelsize
-        self.hexcount = hexcount
         self.hex_orientation = hex_orientation
 
         if hex_orientation == 'flat':
@@ -37,8 +36,6 @@ class HexMap:
                 0.0
             )
             # TODO: Fix this.  The math still isn't quite right.
-            rc = ((self.pixelsize[0] / self.hexcount[0]) / 2) * 1.29  # corner radius or width
-            ri = ((math.sqrt(3) / 2) * (self.pixelsize[1] / self.hexcount[1]) / 2) * 1.26  # side radius or height
         elif hex_orientation == 'pointy':
             self.hex_orientation = self.Orientation(
                 math.sqrt(3.0),
@@ -51,21 +48,16 @@ class HexMap:
                 2.0 / 3.0,
                 0.5
             )
-            ri = ((self.pixelsize[0] / self.hexcount[0]) / 2) * 1.29  # corner radius or width
-            rc = ((math.sqrt(3) / 2) * (self.pixelsize[1] / self.hexcount[1]) / 2) * 1.26  # side radius or height
         else:
             raise Exception('You must specify flat-topped or pointy-topped hexagons.')
 
-        #rc = (self.pixelsize[0] / self.hexcount[0]) / 2  # corner radius or width
-        #ri = (math.sqrt(3) / 2) * rc  # side radius or height
-        self.hexsize = self.Point(rc, ri)
+        self.hexsize = self.Point(hexsize[0], hexsize[1])
+        self.hexcount = self.Point(
+            math.floor(self.pixelsize[0] / self.hexsize.y),
+            math.floor(self.pixelsize[1] / self.hexsize.x)
+        )
 
         self.board = self.populate_board()
-
-    # Orientation = collections.namedtuple("Orientation", ["f0", "f1", "f2", "f3", "b0", "b1", "b2", "b3", "start_angle"])
-    # Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
-    # Point = collections.namedtuple("Point", ["x", "y"])
-    # CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
 
     def hex_add(self, a, b):
         return self.CubeCoord(a.q + b.q, a.r + b.r, a.s + b.s)
@@ -153,9 +145,9 @@ class HexMap:
                         self.Layout(self.hex_orientation, self.hexsize, self.Point(1 + self.hexsize[0], 1 + self.hexsize[1]))
                     )
         else:
-            for q in range(self.hexcount[1]):
+            for q in range(self.hexcount.x):
                 q_offset = int(math.floor(q / 2))
-                for r in range(-q_offset, self.hexcount[0] - q_offset):
+                for r in range(-q_offset, self.hexcount.y - q_offset):
                     # start in 0,0 + radius
                     board['{0}, {1}'.format(str(q), str(r))] = HexCell(
                         self.Point(q, r),

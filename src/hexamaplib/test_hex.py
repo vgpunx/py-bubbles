@@ -8,9 +8,9 @@ def main():
     pygame.init()
 
     # configure screen.  we don't care if this one isn't resizable
-    screensize = (500, 500)
+    screensize = (400, 600)
 
-    screen = pygame.display.set_mode(screensize)
+    screen = pygame.display.set_mode(screensize, RESIZABLE)
     pygame.display.set_caption('Hexamaplib Test')
 
     # white background surface
@@ -22,10 +22,10 @@ def main():
     clock = pygame.time.Clock()
 
     # now the hex stuff
-    hexcount = (10, 10)
+    hexsize = (25, 25)
     cell_or = 'flat'
 
-    hexmap = hex_map.HexMap(screensize, hexcount, cell_or)
+    hexmap = hex_map.HexMap(screensize, hexsize, cell_or)
 
     for cell in hexmap.board.values():
         cell.paint(background)
