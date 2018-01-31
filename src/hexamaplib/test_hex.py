@@ -8,7 +8,7 @@ def main():
     pygame.init()
 
     # configure screen.  we don't care if this one isn't resizable
-    screensize = (400, 600)
+    screensize = (500, 600)
 
     screen = pygame.display.set_mode(screensize, RESIZABLE)
     pygame.display.set_caption('Hexamaplib Test')
