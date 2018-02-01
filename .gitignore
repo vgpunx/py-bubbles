@@ -1,5 +1,5 @@
 
 \.idea/workspace\.xml
 *.pyc
-
-*.pyc
+.idea/misc.xml
+.idea/py-bubbles.iml
