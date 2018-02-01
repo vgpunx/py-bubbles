@@ -5,11 +5,11 @@ from hex_cell import HexCell
 # TODO: Implement a HexMap class, incorporate the below methods, and write the damn docstrings
 class HexMap:
 
-    def __init__(self, pixelsize, hexsize, hex_orientation='flat'):
+    def __init__(self, surface_size, hexsize, hex_orientation='flat'):
 
         """
 
-        :param pixelsize: -> tuple
+        :param surface_size: -> tuple
         :param hexsize: -> tuple
         :param hex_orientation: -> str
         """
@@ -20,10 +20,17 @@ class HexMap:
         self.Point = collections.namedtuple("Point", ["x", "y"])
         self.CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
 
-        self.pixelsize = pixelsize
-        self.hex_orientation = hex_orientation
+        self.surface_size = surface_size
+        self.hexsize = self.Point(hexsize[0], hexsize[1])
+        self.hextype = str.lower(hex_orientation)
 
-        if hex_orientation == 'flat':
+        # total width of a hex is size * 2
+        # total height of a hex is math.sqrt(3)/2 * width
+        # spacing between hexes on the horizontal axis is width
+        hexwidth = int(self.hexsize.x * 1.5)
+        hexheight = int((math.sqrt(3) / 2) * (self.hexsize.x * 2))
+
+        if self.hextype == 'flat':
             self.hex_orientation = self.Orientation(
                 3.0 / 2.0,
                 0.0,
@@ -35,8 +42,10 @@ class HexMap:
                 math.sqrt(3.0) / 3.0,
                 0.0
             )
-            # TODO: Fix this.  The math still isn't quite right.
-        elif hex_orientation == 'pointy':
+
+            self.hexcount = self.Point(int(self.surface_size[0] / hexwidth), int(self.surface_size[1] / hexheight))
+
+        elif self.hextype == 'pointy':
             self.hex_orientation = self.Orientation(
                 math.sqrt(3.0),
                 math.sqrt(3.0) / 2.0,
@@ -48,17 +57,10 @@ class HexMap:
                 2.0 / 3.0,
                 0.5
             )
+
+            self.hexcount = self.Point(int(self.surface_size[1] / hexheight), int(self.surface_size[0] / hexwidth))
         else:
             raise Exception('You must specify flat-topped or pointy-topped hexagons.')
-
-        self.hexsize = self.Point(hexsize[0], hexsize[1])
-
-        # total width of a hex is size * 2
-        # total height of a hex is math.sqrt(3)/2 * width
-        # spacing between hexes on the horizontal axis is width
-        hexwidth = int(self.hexsize.x * 1.5)
-        hexheight = int((math.sqrt(3) / 2) * (self.hexsize.x * 2))
-        self.hexcount = self.Point(int(self.pixelsize[0] / hexwidth), int(self.pixelsize[1] / hexheight))
 
         self.board = self.populate_board()
 

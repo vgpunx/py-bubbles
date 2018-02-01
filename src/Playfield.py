@@ -1,5 +1,6 @@
 import math, pygame
-import src.hexmap.map as hxm
+from hex_map import HexMap
+from pygame.locals import *
 
 
 class Playfield:
