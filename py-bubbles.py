@@ -1,4 +1,5 @@
 import pygame
+from src.playfield import Playfield
 from pygame.locals import *
 
 
@@ -16,24 +17,25 @@ def main():
     # later, src.Playfield will handle this part
     bg_orig = pygame.Surface(screen.get_size())
     bg_orig = bg_orig.convert(bg_orig)
-    bg_orig.fill(pygame.Color('white'))
+    bg_orig.fill(pygame.Color('blue'))
+
+    playfield_size = (400, 600)
+    cell_size = (30, 30)
+    playfield = Playfield(playfield_size, cell_size)
+    playfield.test()
 
     clock = pygame.time.Clock()
 
     while True:
         # paste the background
         screen.blit(bg_orig, (0, 0))
+        screen.blit(playfield.get_surface(), ((screen.get_size()[0] / 2) - playfield_size[0] / 2, 0))
 
         # this is the event handler, which we should move to src.Control
         # this is where any graphical updates are blitted to the display
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
-            elif event.type == pygame.VIDEORESIZE:
-                screen = pygame.display.set_mode(event.dict['size'], pygame.RESIZABLE)
-                background = pygame.transform.scale(bg_orig, event.dict['size'])
-                background = background.convert(background)
-                background.fill(pygame.Color('white'))
 
         # update the display to show changes
         # in production, we will use "dirty rect" updating to improve performance
