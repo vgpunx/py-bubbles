@@ -5,26 +5,17 @@ from hex_cell import HexCell
 # TODO: Implement a HexMap class, incorporate the below methods, and write the damn docstrings
 class HexMap:
 
-    def __init__(self, surface_size, hexcount=None, hexsize=None, hex_orientation='flat'):
+    def __init__(self, surface_size, cellsize, hex_orientation='flat'):
 
         """
 
         :param surface_size: Size of target Surface.
         :type surface_size: Tuple
-        :param hexcount: Number of cells per (row, col)
-        :type hexcount: Tuple
-        :param hexsize: Radii for hex cell size.
-        :type hexsize: Tuple
+        :param cellsize: Radii for hex cell size.
+        :type cellsize: Tuple
         :param hex_orientation: Orientation of individual hexagon cells.
         :type hex_orientation: str
         """
-
-        global cellwidth
-        if hexsize is None and hexcount is None:
-            if hexsize is not None and hexcount is not None:
-                raise Exception('Parameters hexsize and hexcount are mutually exclusive.')
-            else:
-                raise Exception('Must specify a value for either hexsize or hexcount parameter.')
 
         self.Orientation = collections.namedtuple("Orientation",
                                                   ["f0", "f1", "f2", "f3", "b0", "b1", "b2", "b3", "start_angle"])
@@ -35,22 +26,13 @@ class HexMap:
         self.surface_size = surface_size
         self.hextype = str.lower(hex_orientation)
 
-        if hexsize:
-            self.hexsize = self.Point(hexsize[0], hexsize[1])
+        self.cellsize = self.Point(cellsize[0], cellsize[1])
 
-            # Calculate cell count from cell size and surface size:
-            # colcount = s / (Rc * 1.50)
-            # rowcount = s / (math.sqrt(3) / 2) * (Ri * 2)
-            colcount = self.hexsize.x * 1.5
-            rowcount = (math.sqrt(3) / 2) * (self.hexsize.x * 2)
-
-        elif hexcount:
-            self.hexcount = hexcount
-            # Calculate cell size from cell count and surface size:
-            # Rc = (s / colcount) * 0.75
-            # Ri = s / (rowcount * math.sqrt(3))
-            cellwidth = (self.surface_size[0] / self.hexcount[1]) * 0.75
-            cellheight = self.surface_size[1] / (self.hexcount[0] * math.sqrt(3))
+        # Calculate cell count from cell size and surface size:
+        # colcount = s / (Rc * 1.50)
+        # rowcount = s / (math.sqrt(3) / 2) * (Ri * 2)
+        colcount = self.cellsize.x * 1.5
+        rowcount = (math.sqrt(3) / 2) * (self.cellsize.x * 2)
 
         if self.hextype == 'flat':
             self.hex_orientation = self.Orientation(
@@ -65,12 +47,8 @@ class HexMap:
                 0.0
             )
 
-            if hexcount:
-                self.hexsize = self.Point(int(cellwidth), int(cellheight))
-
-            elif hexsize:
-                self.hexcount = self.Point(int(self.surface_size[0] / colcount),
-                                           int(self.surface_size[1] / rowcount))
+            self.cellcount = self.Point(int(self.surface_size[0] / colcount),
+                                            int(self.surface_size[1] / rowcount))
 
         elif self.hextype == 'pointy':
             self.hex_orientation = self.Orientation(
@@ -84,12 +62,9 @@ class HexMap:
                 2.0 / 3.0,
                 0.5
             )
-            if hexcount:
-                self.hexsize = self.Point(int(cellheight), int(cellwidth))
 
-            elif hexsize:
-                self.hexcount = self.Point(int(self.surface_size[0] / rowcount),
-                                           int(self.surface_size[1] / rowcount))
+            self.cellcount = self.Point(int(self.surface_size[0] / rowcount),
+                                            int(self.surface_size[1] / colcount))
 
         else:
             raise Exception('Value of hex_orientation must be either "flat" or "pointy."')
@@ -173,24 +148,24 @@ class HexMap:
         # r and q switch for flat or pointy
         if self.hex_orientation == 'pointy':
             # TODO: Fix this part, it's still not producing a rectangular map
-            for r in range(self.hexcount[0]):
+            for r in range(self.cellcount.y):
                 r_offset = int(math.floor(r / 2))
-                for q in range(-r_offset, (self.hexcount[1] - r_offset) - 1):
+                for q in range(-r_offset, (self.cellcount.x - r_offset) - 1):
                     # start in 0,0 + radius
                     board['{0}, {1}'.format(str(q), str(r))] = HexCell(
                         self.Point(q, r),
-                        self.Layout(self.hex_orientation, self.hexsize,
-                                    self.Point(1 + self.hexsize[0], 1 + self.hexsize[1]))
+                        self.Layout(self.hex_orientation, self.cellsize,
+                                    self.Point(self.cellsize[0], self.cellsize[1]))
                     )
         else:
-            for q in range(self.hexcount[0]):
+            for q in range(self.cellcount.x):
                 q_offset = int(math.floor(q / 2))
-                for r in range(-q_offset, self.hexcount[0] - q_offset):
+                for r in range(-q_offset, self.cellcount.y - q_offset):
                     # start in 0,0 + radius
                     board['{0}, {1}'.format(str(q), str(r))] = HexCell(
                         self.Point(q, r),
-                        self.Layout(self.hex_orientation, self.hexsize,
-                                    self.Point(0 + self.hexsize[0], 0 + self.hexsize[1]))
+                        self.Layout(self.hex_orientation, self.cellsize,
+                                    self.Point(0 + self.cellsize[0], 0 + self.cellsize[1]))
                     )
 
         return board

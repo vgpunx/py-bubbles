@@ -22,11 +22,10 @@ def main():
     clock = pygame.time.Clock()
 
     # now the hex stuff
-    hexsize = (30, 30)
-    hexcount = (15, 18)
+    hexsize = (20, 20)
     cell_or = 'flat'
 
-    hexmap = hex_map.HexMap(screensize, hexsize=hexsize, hex_orientation=cell_or)
+    hexmap = hex_map.HexMap(screensize, hexsize, hex_orientation=cell_or)
     counter = 0
     # main loop
     while True:
@@ -43,7 +42,7 @@ def main():
                 return
 
         pygame.display.update()
-        clock.tick(60)
+        clock.tick(120)
 
     pygame.quit()
 
