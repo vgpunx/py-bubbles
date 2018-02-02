@@ -101,5 +101,5 @@ class HexCell(object):
         pygame.draw.polygon(surface, pygame.Color(color), self.get_polygon_corners(self.layout, self.cubepos),
             width
         )
-
+        # small change here for demo
         return surface
