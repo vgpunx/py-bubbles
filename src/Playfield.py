@@ -5,19 +5,15 @@ from pygame.locals import *
 
 class Playfield:
 
-    def __init__(self, height, width, surface):
-        assert isinstance(height, int)
-        assert isinstance(width, int)
-        assert isinstance(surface, pygame.SurfaceType)
+    def __init__(self, surface_size, cell_size):
+        """
+        Renders a background and gameboard surface.
 
-        self.__SURF = surface
+        :param surface_size: Size to use for the gameboard surface
+        :type surface_size: Tuple (int, int)
+        :param cell_size: Size to use for HexMap cell size
+        :type cell_size: Tuple(int, int)
+        """
 
-        # The base playfield is a 2D hex grid
-        # which will begin life as a 2D matrix
-        self.map = []
-        for y in range(height):
-            self.map.append([0 for x in range(width)])
-            
-    
-    #def draw(self):
-        # TODO: blit the background image to the imported surface
+        self.surface = pygame.Surface(surface_size)
+        self.hexmap = HexMap(cell_size, self.surface.get_size())

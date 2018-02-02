@@ -102,7 +102,7 @@ class HexCell(object):
             width
         )
         font = pygame.font.Font(pygame.font.get_default_font(), 10)
-        text = font.render('{0}, {1}'.format(self.axialpos.x, self.axialpos.y), False, pygame.Color(color))
+        text = font.render('{0}, {1}'.format(self.axialpos.x, self.axialpos.y), False, pygame.Color("RED"))
         surface.blit(text, (self.get_pixelpos().x - (text.get_size()[0] / 2), self.get_pixelpos().y))
 
         return surface
