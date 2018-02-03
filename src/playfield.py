@@ -19,7 +19,7 @@ class Playfield:
 
         self.colorkey = (255, 0, 255)
         self.surface = pygame.Surface(surface_size)
-        self.hexmap = HexMap(cell_size, surface_size)
+        self.hexmap = HexMap(surface_size, cell_size)
 
     def update(self):
         self.surface.fill(self.colorkey)
@@ -27,15 +27,18 @@ class Playfield:
     def get_surface(self):
         return self.surface
 
-    def test(self):
-        self.surface.fill(pygame.Color('WHITE'))
-        COLORS = ['RED', 'ORANGE', 'YELLOW', 'GREEN', 'CYAN', 'BLUE', 'VIOLET']
-        colcount = self.hexmap.cellcount.x
-        rowcount = 4
+    def test(self, surface):
+        surface.fill(pygame.Color('WHITE'))
 
-        for i in range(colcount):
-            for j in range(rowcount):
-                address = '{0}, {1}'.format(i, j)
-                cell = self.hexmap.board.get(address)
-                clr = random.shuffle(COLORS)
-                pygame.draw.circle(self.surface, pygame.Color(clr), cell.get_pixelpos(), cell.layout.size.x)
+        COLORS = ['ORANGE', 'YELLOW', 'GREEN', 'CYAN', 'BLUE', 'PINK', 'VIOLET']
+
+        for cell in self.hexmap.board.values():
+            random.shuffle(COLORS)
+            color = pygame.Color(COLORS[0])
+            radius = int(cell.get_size().x) - 2
+            pos = cell.get_pixelpos()
+
+            pygame.draw.circle(surface, color, pos, radius)
+            #cell.paint(surface)
+
+        return surface

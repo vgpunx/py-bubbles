@@ -30,6 +30,9 @@ class HexCell(object):
         """
         return self.__cube_to_pixel__(self.layout, self.cubepos)
 
+    def get_size(self):
+        return self.layout.size
+
     def get_polygon_corners(self, layout, cubecoord):
         """
         Calculate the polygon corners of a hex object in PIXEL COORDINATES.
@@ -72,7 +75,7 @@ class HexCell(object):
         x = (M.f0 * cubecoord.q + M.f1 * cubecoord.r) * size.x
         y = (M.f2 * cubecoord.q + M.f3 * cubecoord.r) * size.y
 
-        return Point(x + origin.x, y + origin.y)
+        return Point(int(x + origin.x), int(y + origin.y))
 
     @staticmethod
     def __pixel_to_cube__(layout, pixel_coords):

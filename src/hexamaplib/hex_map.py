@@ -159,7 +159,7 @@ class HexMap:
                     )
         else:
             for q in range(self.cellcount.x):
-                q_offset = math.floor(q / 2)
+                q_offset = int(math.floor(q / 2))
                 for r in range(-q_offset, self.cellcount.y - q_offset):
                     # start in 0,0 + radius
                     board['{0}, {1}'.format(str(q), str(r))] = HexCell(
