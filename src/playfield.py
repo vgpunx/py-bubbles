@@ -20,6 +20,7 @@ class Playfield:
         self.colorkey = (255, 0, 255)
         self.surface = pygame.Surface(surface_size)
         self.hexmap = HexMap(surface_size, cell_size)
+        self.bubble_map = []
 
     def update(self):
         self.surface.fill(self.colorkey)
@@ -27,13 +28,28 @@ class Playfield:
     def get_surface(self):
         return self.surface
 
-    def test(self, surface, bubblemap=None, showcoords=False):
+    def load_map(self, filepath):
+        try:
+            m = open(filepath, 'r').readline()
+            self.bubble_map = m.split(';')
+        except:
+            raise SystemExit('Unable to read file located at {0}.'.format(filepath))
+
+    def test(self, surface, bubble_map=None, showcoords=False):
+
+        if self.bubble_map and bubble_map is None:
+            this_map = self.bubble_map
+        elif bubble_map is None:
+            this_map = bubble_map
+        else:
+            this_map = None
+
         surface.fill(pygame.Color('WHITE'))
 
         COLORS = ['ORANGE', 'YELLOW', 'GREEN', 'CYAN', 'BLUE', 'PINK', 'VIOLET']
 
-        if bubblemap is not None:
-            for address in bubblemap:
+        if this_map is not None:
+            for address in this_map:
                 random.shuffle(COLORS)
                 bubblecolor = pygame.Color(COLORS[0])
                 cell = self.hexmap.board.get(address)
@@ -41,6 +57,7 @@ class Playfield:
                 pos = cell.get_pixelpos()
 
                 pygame.draw.circle(surface, bubblecolor, pos, radius)
+                pygame.draw.circle(surface, pygame.Color('BLACK'), pos, radius, 2)
 
                 if showcoords:
                     cell.paint(surface)

@@ -1,4 +1,4 @@
-import pygame
+import pygame, os
 from src.playfield import Playfield
 from pygame.locals import *
 
@@ -11,17 +11,17 @@ def main():
     CELL_SIZE = (PFLD_SIZE[0] / 23, PFLD_SIZE[0] / 23)  # Fit 15 bubbles across
 
     ## BUBBLE MAP
-    TEST_MAP0 = []
-
-    col_count = 15
-    row_counter = 0
-
-    for q in range(col_count):
-        for r in range(row_counter, row_counter + 3):
-            TEST_MAP0.append('{0}, {1}'.format(q, r))
-
-        if q % 2 == 1:
-            row_counter -= 1
+    # TEST_MAP0 = []
+    #
+    # col_count = 15
+    # row_counter = 0
+    #
+    # for q in range(col_count):
+    #     for r in range(row_counter, row_counter + 3):
+    #         TEST_MAP0.append('{0}, {1}'.format(q, r))
+    #
+    #     if q % 2 == 1:
+    #         row_counter -= 1
 
     ## COLORS
 
@@ -44,7 +44,8 @@ def main():
     bg_orig.fill(pygame.Color('blue'))
 
     playfield = Playfield(PFLD_SIZE, CELL_SIZE)
-    sur = playfield.test(playfield.get_surface(), TEST_MAP0)
+    playfield.load_map(os.path.join(os.curdir, 'maps', 'TEST_MAP0'))
+    sur = playfield.test(playfield.get_surface())
 
     clock = pygame.time.Clock()
 
