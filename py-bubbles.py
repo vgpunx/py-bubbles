@@ -5,14 +5,27 @@ from pygame.locals import *
 
 def main():
     ### CONSTANTS ###
-    # SIZE
+    ## SIZE
     DISP_SIZE = (800, 600)
-    PFLD_SIZE = (DISP_SIZE[0] * 0.65, DISP_SIZE[1] * 0.95)  # 65% scr width, 95% scr height
+    PFLD_SIZE = (DISP_SIZE[0] * 0.65, DISP_SIZE[1] * 0.85)  # 65% scr width, 85% scr height
     CELL_SIZE = (PFLD_SIZE[0] / 23, PFLD_SIZE[0] / 23)  # Fit 15 bubbles across
 
-    # COLORS
+    ## BUBBLE MAP
+    TEST_MAP0 = []
 
-    # ALIGNMENT
+    col_count = 15
+    row_counter = 0
+
+    for q in range(col_count):
+        for r in range(row_counter, row_counter + 3):
+            TEST_MAP0.append('{0}, {1}'.format(q, r))
+
+        if q % 2 == 1:
+            row_counter -= 1
+
+    ## COLORS
+
+    ## ALIGNMENT
 
 
     # initialize pygame
@@ -31,7 +44,7 @@ def main():
     bg_orig.fill(pygame.Color('blue'))
 
     playfield = Playfield(PFLD_SIZE, CELL_SIZE)
-    sur = playfield.test(playfield.get_surface())
+    sur = playfield.test(playfield.get_surface(), TEST_MAP0)
 
     clock = pygame.time.Clock()
 
@@ -40,7 +53,7 @@ def main():
         screen.blit(bg_orig, (0, 0))
         screen.blit(
             sur,
-            ((screen.get_size()[0] / 2) - PFLD_SIZE[0] / 2, (screen.get_size()[1] / 2) - PFLD_SIZE[1] / 2)
+            ((screen.get_size()[0] / 2) - PFLD_SIZE[0] / 2, screen.get_size()[1] - (screen.get_size()[1] * 0.98))
         )
 
         # this is the event handler, which we should move to src.Control

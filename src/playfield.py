@@ -27,18 +27,34 @@ class Playfield:
     def get_surface(self):
         return self.surface
 
-    def test(self, surface):
+    def test(self, surface, bubblemap=None, showcoords=False):
         surface.fill(pygame.Color('WHITE'))
 
         COLORS = ['ORANGE', 'YELLOW', 'GREEN', 'CYAN', 'BLUE', 'PINK', 'VIOLET']
 
-        for cell in self.hexmap.board.values():
-            random.shuffle(COLORS)
-            color = pygame.Color(COLORS[0])
-            radius = int(cell.get_size().x) - 2
-            pos = cell.get_pixelpos()
+        if bubblemap is not None:
+            for address in bubblemap:
+                random.shuffle(COLORS)
+                bubblecolor = pygame.Color(COLORS[0])
+                cell = self.hexmap.board.get(address)
+                radius = int(cell.get_size().x) - 2
+                pos = cell.get_pixelpos()
 
-            pygame.draw.circle(surface, color, pos, radius)
-            #cell.paint(surface)
+                pygame.draw.circle(surface, bubblecolor, pos, radius)
+
+                if showcoords:
+                    cell.paint(surface)
+
+        else:
+            for cell in self.hexmap.board.values():
+                random.shuffle(COLORS)
+                bubblecolor = pygame.Color(COLORS[0])
+                radius = int(cell.get_size().x) - 2
+                pos = cell.get_pixelpos()
+
+                pygame.draw.circle(surface, bubblecolor, pos, radius)
+
+                if showcoords:
+                    cell.paint(surface)
 
         return surface
