@@ -1,5 +1,6 @@
 import pygame, os
 from src.playfield import Playfield
+from src.bubble import Bubble
 from pygame.locals import *
 
 
@@ -11,17 +12,7 @@ def main():
     CELL_SIZE = (PFLD_SIZE[0] / 23, PFLD_SIZE[0] / 23)  # Fit 15 bubbles across
 
     ## BUBBLE MAP
-    # TEST_MAP0 = []
-    #
-    # col_count = 15
-    # row_counter = 0
-    #
-    # for q in range(col_count):
-    #     for r in range(row_counter, row_counter + 3):
-    #         TEST_MAP0.append('{0}, {1}'.format(q, r))
-    #
-    #     if q % 2 == 1:
-    #         row_counter -= 1
+
 
     ## COLORS
 
@@ -40,22 +31,42 @@ def main():
     # simple solid fill for now
     # later, src.Playfield will handle this part
     bg_orig = pygame.Surface(screen.get_size())
-    bg_orig = bg_orig.convert(bg_orig)
+    bg_orig = bg_orig.convert()
     bg_orig.fill(pygame.Color('blue'))
 
     playfield = Playfield(PFLD_SIZE, CELL_SIZE)
     playfield.load_map(os.path.join(os.curdir, 'maps', 'TEST_MAP0'))
-    sur = playfield.test(playfield.get_surface())
+    sur = playfield.test(playfield.get_surface(), showcoords=True)
+    sur.convert()
+
+    b_start = list(playfield.hexmap.board.get('7, 9').get_pixelpos())
+    b_start[0] = int(b_start[0] + (screen.get_size()[0] / 2) - b_start[0])
+    b_orig = b_start
+    test_bub = Bubble(
+        screen,
+        b_start,
+        int(CELL_SIZE[0] - 2),
+        'RED',
+        'BLACK'
+    )
+
+    test_bub.velocity = 10
 
     clock = pygame.time.Clock()
 
     while True:
         # paste the background
         screen.blit(bg_orig, (0, 0))
+
         screen.blit(
             sur,
             ((screen.get_size()[0] / 2) - PFLD_SIZE[0] / 2, screen.get_size()[1] - (screen.get_size()[1] * 0.98))
         )
+
+        if test_bub.pos[1] < 0:
+            test_bub.pos[1] = b_orig[1]
+        else:
+            test_bub.update()
 
         # this is the event handler, which we should move to src.Control
         # this is where any graphical updates are blitted to the display
