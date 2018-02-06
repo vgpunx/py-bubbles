@@ -41,7 +41,7 @@ def main():
 
     b_start = list(playfield.hexmap.board.get('7, 9').get_pixelpos())
     b_start[0] = int(b_start[0] + (screen.get_size()[0] / 2) - b_start[0])
-    b_orig = b_start
+    b_orig = b_start[1]
     test_bub = Bubble(
         screen,
         b_start,
@@ -51,6 +51,7 @@ def main():
     )
 
     test_bub.velocity = 10
+    test_bub.angle = 135
 
     clock = pygame.time.Clock()
 
@@ -63,8 +64,8 @@ def main():
             ((screen.get_size()[0] / 2) - PFLD_SIZE[0] / 2, screen.get_size()[1] - (screen.get_size()[1] * 0.98))
         )
 
-        if test_bub.pos[1] < 0:
-            test_bub.pos[1] = b_orig[1]
+        if test_bub.pos[1] <= 0:
+            test_bub.pos[1] = b_orig
         else:
             test_bub.update()
 

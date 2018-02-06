@@ -14,6 +14,7 @@ class Bubble(pygame.sprite.Sprite):
         # for drawing placeholder images
         # this will be replaced with actual image code later
         self.radius = radius
+        self.rect = pygame.Rect((0, 0), (radius * 2, radius * 2))
         self.fill = pygame.Color(fill_color)
         self.stroke = pygame.Color(stroke_color)
 
@@ -32,6 +33,7 @@ class Bubble(pygame.sprite.Sprite):
     def update(self, *args):
         super().update(*args)
         self.move()
+        self.bounce()
         self.draw()
 
     def kill(self):
@@ -54,14 +56,30 @@ class Bubble(pygame.sprite.Sprite):
     def move(self):
         if self.angle < 90:
             radians = math.radians(self.angle)
-            self.pos[0] += math.cos(radians) * self.velocity
-            self.pos[1] += math.sin(radians) * self.velocity * -1
+            self.pos[0] += int(math.cos(radians) * self.velocity)
+            self.pos[1] += int(math.sin(radians) * self.velocity * -1)
 
         elif self.angle > 90:
             radians = math.radians(180 - self.angle)
-            self.pos[0] += math.cos(radians) * self.velocity * -1
-            self.pos[1] += math.cos(radians) * self.velocity * -1
+            self.pos[0] += int(math.cos(radians) * self.velocity * -1)
+            self.pos[1] += int(math.cos(radians) * self.velocity * -1)
 
         else:
             self.pos[0] += 0
             self.pos[1] += self.velocity * -1
+
+    def bounce(self):
+        bounds = self.surface.get_size()
+        size = self.radius
+
+        if self.pos[0] >= bounds[0] - size:
+            self.angle -= self.angle
+
+        elif self.pos[0] <= 0:
+            self.angle -= self.angle
+
+        if self.pos[1] >= bounds[1] - size:
+            self.angle = math.pi - self.angle
+
+        elif self.pos[1] <= size:
+            self.angle = math.pi - self.angle
