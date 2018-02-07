@@ -1,22 +1,27 @@
-import pygame, math, collections
+import math
+import pygame
 
 
 class Bubble(pygame.sprite.Sprite):
 
-    def __init__(self, surface, pos, radius, fill_color, stroke_color, *groups):
+    def __init__(self, pos, bounds, radius, fill_color, stroke_color, *groups):
         super().__init__(*groups)
-        self.surface = surface
+        self.image = pygame.Surface((radius * 2, radius * 2))
+        self.image.set_colorkey(pygame.Color('MAGENTA'))
 
         self.pos = pos
         self.velocity = 0
         self.angle = 90
+        self.bounds = bounds
 
         # for drawing placeholder images
         # this will be replaced with actual image code later
         self.radius = radius
-        self.rect = pygame.Rect((0, 0), (radius * 2, radius * 2))
+        self.rect = self.image.get_rect()
         self.fill = pygame.Color(fill_color)
         self.stroke = pygame.Color(stroke_color)
+
+        self.draw()
 
     def add(self, *groups):
         super().add(*groups)
@@ -34,7 +39,6 @@ class Bubble(pygame.sprite.Sprite):
         super().update(*args)
         self.move()
         self.bounce()
-        self.draw()
 
     def kill(self):
         super().kill()
@@ -50,8 +54,10 @@ class Bubble(pygame.sprite.Sprite):
 
     def draw(self):
         # placeholder code
-        pygame.draw.circle(self.surface, self.fill, self.pos, self.radius)  # filled cir
-        pygame.draw.circle(self.surface, self.stroke, self.pos, self.radius, 2)  # stroke
+        self.image.fill(pygame.Color('MAGENTA'))
+        pygame.draw.circle(self.image, self.fill, self.image.get_rect().center, self.radius)  # filled cir
+        pygame.draw.circle(self.image, self.stroke, self.image.get_rect().center, self.radius, 2)  # stroke
+        self.image.convert()
 
     def move(self):
         if self.angle < 90:
@@ -69,17 +75,13 @@ class Bubble(pygame.sprite.Sprite):
             self.pos[1] += self.velocity * -1
 
     def bounce(self):
-        bounds = self.surface.get_size()
         size = self.radius
+        ang = math.radians(self.angle)
 
-        if self.pos[0] >= bounds[0] - size:
-            self.angle -= self.angle
+        if self.pos[0] + size >= self.bounds[0] or self.pos[0] - size <= 0:
+            ang = - ang
 
-        elif self.pos[0] <= 0:
-            self.angle -= self.angle
+        elif self.pos[1] + size >= self.bounds[1] or self.pos[1] - size <= size:
+            ang = math.pi - ang
 
-        if self.pos[1] >= bounds[1] - size:
-            self.angle = math.pi - self.angle
-
-        elif self.pos[1] <= size:
-            self.angle = math.pi - self.angle
+        self.angle = int(math.degrees(ang))

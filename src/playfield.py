@@ -1,5 +1,7 @@
-import math, pygame
+import math
+import pygame
 import random
+from src.bubble import Bubble
 
 from src.hexamaplib.hex_map import HexMap
 from pygame.locals import *
@@ -20,20 +22,48 @@ class Playfield:
         self.colorkey = 'WHITE'
         self.surface = pygame.Surface(surface_size)
         self.hexmap = HexMap(surface_size, cell_size)
+        self.size = cell_size[0] - 2
         self.bubble_map = []
 
     def update(self):
         self.surface.fill(pygame.Color(self.colorkey))
+
+        try:
+            for bubble in self.bubble_map:
+                bubble.update()
+
+        except:
+            raise
 
     def get_surface(self):
         return self.surface
 
     def load_map(self, filepath):
         try:
+            COLORS = ['ORANGE', 'YELLOW', 'GREEN', 'CYAN', 'BLUE', 'PINK', 'VIOLET']
+
             m = open(filepath, 'r').readline()
-            self.bubble_map = m.split(';')
+            addresses = m.split(';')
+
         except:
             raise SystemExit('Unable to read file located at {0}.'.format(filepath))
+
+        try:
+            for address in addresses:
+                random.shuffle(COLORS)
+                curr_clr = pygame.Color(COLORS[0])
+
+                self.bubble_map.append(
+                    Bubble(
+                        self.hexmap.board.get(address).get_pixelpos(),
+                        self.surface.get_size(),
+                        self.size,
+                        curr_clr,
+                        pygame.Color('BLACK')
+                    )
+                )
+        except:
+            raise
 
     def test(self, surface, bubble_map=None, showcoords=False):
 

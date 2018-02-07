@@ -26,6 +26,7 @@ def main():
 
     screen = pygame.display.set_mode(DISP_SIZE)
     pygame.display.set_caption('Py-Bubbles')
+    screen.set_colorkey(pygame.Color('MAGENTA'))
 
     # set up the background
     # simple solid fill for now
@@ -37,28 +38,30 @@ def main():
     playfield = Playfield(PFLD_SIZE, CELL_SIZE)
     playfield.load_map(os.path.join(os.curdir, 'maps', 'TEST_MAP0'))
     sur = playfield.test(playfield.get_surface(), showcoords=True)
+    sur.set_colorkey(pygame.Color('MAGENTA'))
     sur.convert()
 
     b_start = list(playfield.hexmap.board.get('7, 9').get_pixelpos())
-    b_start[0] = int(b_start[0] + (screen.get_size()[0] / 2) - b_start[0])
+    b_start[0] = int(b_start[0] + (sur.get_size()[0] / 2) - b_start[0])
     b_orig = b_start[1]
     test_bub = Bubble(
-        screen,
         b_start,
+        playfield.get_surface().get_size(),
         int(CELL_SIZE[0] - 2),
         'RED',
         'BLACK'
     )
 
     test_bub.velocity = 10
-    test_bub.angle = 135
+    test_bub.angle = 45
 
     clock = pygame.time.Clock()
 
     while True:
         # paste the background
+        bg_orig.blit(sur, screen.get_rect().center)
+        sur.blit(test_bub.image, test_bub.pos)
         screen.blit(bg_orig, (0, 0))
-
         screen.blit(
             sur,
             ((screen.get_size()[0] / 2) - PFLD_SIZE[0] / 2, screen.get_size()[1] - (screen.get_size()[1] * 0.98))
@@ -68,8 +71,7 @@ def main():
             test_bub.pos[1] = b_orig
         else:
             test_bub.update()
-
-        # this is the event handler, which we should move to src.Control
+                # this is the event handler, which we should move to src.Control
         # this is where any graphical updates are blitted to the display
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
