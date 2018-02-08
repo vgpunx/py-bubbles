@@ -8,7 +8,7 @@ def main():
     ### CONSTANTS ###
     ## SIZE
     DISP_SIZE = (800, 600)
-    PFLD_SIZE = (DISP_SIZE[0] * 0.65, DISP_SIZE[1] * 0.85)  # 65% scr width, 85% scr height
+    PFLD_SIZE = (DISP_SIZE[0] * 0.65, DISP_SIZE[1] * 0.98)  # 65% scr width, 85% scr height
     CELL_SIZE = (PFLD_SIZE[0] / 23, PFLD_SIZE[0] / 23)  # Fit 15 bubbles across
 
     ## BUBBLE MAP
@@ -37,7 +37,7 @@ def main():
 
     playfield = Playfield(PFLD_SIZE, CELL_SIZE)
     playfield.load_map(os.path.join(os.curdir, 'maps', 'TEST_MAP0'))
-    sur = playfield.test(playfield.get_surface(), showcoords=True)
+    sur = playfield.get_surface()
     sur.set_colorkey(pygame.Color('MAGENTA'))
     sur.convert()
 
@@ -59,12 +59,13 @@ def main():
 
     while True:
         # paste the background
-        bg_orig.blit(sur, screen.get_rect().center)
+        playfield.update()
         sur.blit(test_bub.image, test_bub.pos)
+
         screen.blit(bg_orig, (0, 0))
         screen.blit(
             sur,
-            ((screen.get_size()[0] / 2) - PFLD_SIZE[0] / 2, screen.get_size()[1] - (screen.get_size()[1] * 0.98))
+            ((screen.get_size()[0] / 2) - PFLD_SIZE[0] / 2, (screen.get_size()[1] / 2) - PFLD_SIZE[1] / 2)
         )
 
         if test_bub.pos[1] <= 0:

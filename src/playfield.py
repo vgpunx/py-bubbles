@@ -21,8 +21,9 @@ class Playfield:
 
         self.colorkey = 'WHITE'
         self.surface = pygame.Surface(surface_size)
+        self.surface.convert()
         self.hexmap = HexMap(surface_size, cell_size)
-        self.size = cell_size[0] - 2
+        self.size = int(cell_size[0] - 2)
         self.bubble_map = []
 
     def update(self):
@@ -31,7 +32,7 @@ class Playfield:
         try:
             for bubble in self.bubble_map:
                 bubble.update()
-
+                self.surface.blit(bubble.image, bubble.pos)
         except:
             raise
 
@@ -51,7 +52,7 @@ class Playfield:
         try:
             for address in addresses:
                 random.shuffle(COLORS)
-                curr_clr = pygame.Color(COLORS[0])
+                curr_clr = COLORS[0]
 
                 self.bubble_map.append(
                     Bubble(
@@ -59,7 +60,7 @@ class Playfield:
                         self.surface.get_size(),
                         self.size,
                         curr_clr,
-                        pygame.Color('BLACK')
+                        'BLACK'
                     )
                 )
         except:

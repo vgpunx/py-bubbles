@@ -9,7 +9,7 @@ class Bubble(pygame.sprite.Sprite):
         self.image = pygame.Surface((radius * 2, radius * 2))
         self.image.set_colorkey(pygame.Color('MAGENTA'))
 
-        self.pos = pos
+        self.pos = [pos[0] - radius, pos[1] - radius]
         self.velocity = 0
         self.angle = 90
         self.bounds = bounds
@@ -75,11 +75,11 @@ class Bubble(pygame.sprite.Sprite):
             self.pos[1] += self.velocity * -1
 
     def bounce(self):
-        size = self.radius
+        size = self.radius * 2
         ang = math.radians(self.angle)
 
         if self.pos[0] + size >= self.bounds[0] or self.pos[0] - size <= 0:
-            ang = - ang
+            ang = -ang
 
         elif self.pos[1] + size >= self.bounds[1] or self.pos[1] - size <= size:
             ang = math.pi - ang
