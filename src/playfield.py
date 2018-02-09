@@ -24,7 +24,7 @@ class Playfield:
         self.surface.convert()
         self.hexmap = HexMap(surface_size, cell_size)
         self.size = int(cell_size[0] - 2)
-        self.bubble_map = []
+        self.bubble_map = pygame.sprite.Group()
 
     def update(self):
         self.surface.fill(pygame.Color(self.colorkey))
@@ -54,7 +54,7 @@ class Playfield:
                 random.shuffle(COLORS)
                 curr_clr = COLORS[0]
 
-                self.bubble_map.append(
+                self.bubble_map.add(
                     Bubble(
                         self.hexmap.board.get(address).get_pixelpos(),
                         self.surface.get_size(),
