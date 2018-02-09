@@ -1,17 +1,20 @@
 import math
 import pygame
+from pygame.math import Vector2
 
 
 class Bubble(pygame.sprite.Sprite):
 
-    def __init__(self, pos, bounds, radius, fill_color, stroke_color, *groups):
+    def __init__(self, pos, bounds, radius, fill_color, stroke_color, *groups, angle=90, velocity=0):
         super().__init__(*groups)
-        self.image = pygame.Surface((radius * 2, radius * 2))
+        self.image = pygame.transform.rotate(pygame.Surface((radius * 2, radius * 2)), -angle)
         self.image.set_colorkey(pygame.Color('MAGENTA'))
 
-        self.pos = [pos[0] - radius, pos[1] - radius]
-        self.velocity = 0
-        self.angle = 90
+        offset = Vector2(radius, -radius).rotate(angle)
+        self.pos = Vector2(pos) - offset
+        self.velocity = Vector2(1, 0).rotate(angle) * velocity
+        self.angle = angle
+        self.rect = self.image.get_rect(center=pos)
         self.bounds = bounds
 
         # for drawing placeholder images
@@ -37,8 +40,10 @@ class Bubble(pygame.sprite.Sprite):
 
     def update(self, *args):
         super().update(*args)
-        self.move()
-        self.bounce()
+        if self.alive():
+            self.move()
+            self.rect.center = self.pos
+            self.bounce()
 
     def kill(self):
         super().kill()
@@ -60,19 +65,23 @@ class Bubble(pygame.sprite.Sprite):
         self.image.convert()
 
     def move(self):
-        if self.angle <= 90:
-            radians = math.radians(self.angle)
-            self.pos[0] += int(math.cos(radians) * self.velocity)
-            self.pos[1] += int(math.sin(radians) * self.velocity * -1)
+        # if self.angle <= 90:
+        #     radians = math.radians(self.angle)
+        #     self.pos[0] += int(math.cos(radians) * self.velocity)
+        #     self.pos[1] += int(math.sin(radians) * self.velocity * -1)
+        #
+        # elif self.angle > 90:
+        #     radians = math.radians(180 - self.angle)
+        #     self.pos[0] += int(math.cos(radians) * self.velocity * -1)
+        #     self.pos[1] += int(math.cos(radians) * self.velocity * -1)
+        #
+        # else:
+        #     self.pos[0] += 0
+        #     self.pos[1] += self.velocity * -1
+        self.pos += self.velocity
 
-        elif self.angle > 90:
-            radians = math.radians(180 - self.angle)
-            self.pos[0] += int(math.cos(radians) * self.velocity * -1)
-            self.pos[1] += int(math.cos(radians) * self.velocity * -1)
-
-        else:
-            self.pos[0] += 0
-            self.pos[1] += self.velocity * -1
+        # if not self.bounds.contains(self.rect()):
+        #     self.kill()
 
     def bounce(self):
         # 0deg is -->, 90 is ^
@@ -82,7 +91,7 @@ class Bubble(pygame.sprite.Sprite):
 
         # vertical boundaries
         if self.pos[0] + size >= self.bounds[0]:
-            aor =
+            aor = 0
 
         # homarizontal boundaries
         #     aoi = 360 - (aoi + 180)
@@ -93,3 +102,6 @@ class Bubble(pygame.sprite.Sprite):
              aoi += 360
 
         self.angle = aor
+
+    def set_velocity(self, velocity):
+        self.velocity = Vector2(1, 0).rotate(self.angle) * velocity

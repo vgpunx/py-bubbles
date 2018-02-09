@@ -38,7 +38,7 @@ def main():
     playfield = Playfield(PFLD_SIZE, CELL_SIZE)
     playfield.load_map(os.path.join(os.curdir, 'maps', 'TEST_MAP0'))
     sur = playfield.get_surface()
-    sur.set_colorkey(pygame.Color('MAGENTA'))
+    # sur.set_colorkey(pygame.Color('MAGENTA'))
     sur.convert()
 
     b_start = list(playfield.hexmap.board.get('7, 9').get_pixelpos())
