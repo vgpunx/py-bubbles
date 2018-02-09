@@ -39,20 +39,20 @@ def main():
     playfield.load_map(os.path.join(os.curdir, 'maps', 'TEST_MAP0'))
     sur = playfield.get_surface()
     # sur.set_colorkey(pygame.Color('MAGENTA'))
-    sur.convert()
 
     b_start = list(playfield.hexmap.board.get('7, 9').get_pixelpos())
     b_start[0] = int(b_start[0] + (sur.get_size()[0] / 2) - b_start[0])
     b_orig = b_start[1]
+
     test_bub = Bubble(
-        b_start,
-        playfield.get_surface().get_size(),
-        int(CELL_SIZE[0] - 2),
-        'RED',
-        'BLACK'
+        pos=b_start,
+        bounds=sur.get_rect(),
+        radius=int(CELL_SIZE[0] - 2),
+        fill_color='RED',
+        stroke_color='BLACK'
     )
 
-    test_bub.velocity = 10
+    test_bub.set_velocity(10)
     test_bub.angle = 45
 
     clock = pygame.time.Clock()
@@ -60,7 +60,7 @@ def main():
     while True:
         # paste the background
         playfield.update()
-        sur.blit(test_bub.image, test_bub.pos)
+        sur.blit(test_bub.image, test_bub.rect)
 
         screen.blit(bg_orig, (0, 0))
         screen.blit(
@@ -72,7 +72,7 @@ def main():
             test_bub.pos[1] = b_orig
         else:
             test_bub.update()
-                # this is the event handler, which we should move to src.Control
+        # this is the event handler, which we should move to src.Control
         # this is where any graphical updates are blitted to the display
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

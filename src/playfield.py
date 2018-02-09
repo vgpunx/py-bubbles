@@ -32,7 +32,7 @@ class Playfield:
         try:
             for bubble in self.bubble_map:
                 bubble.update()
-                self.surface.blit(bubble.image, bubble.pos)
+                self.surface.blit(bubble.image, bubble.rect)
         except:
             raise
 
@@ -57,7 +57,7 @@ class Playfield:
                 self.bubble_map.add(
                     Bubble(
                         self.hexmap.board.get(address).get_pixelpos(),
-                        self.surface.get_size(),
+                        self.surface.get_rect(),
                         self.size,
                         curr_clr,
                         'BLACK'
@@ -96,7 +96,7 @@ class Playfield:
         else:
             for cell in self.hexmap.board.values():
                 random.shuffle(COLORS)
-                bubblecolor = pygame.Color(COLORS[0])
+                bubblecolor = COLORS[0]
                 radius = int(cell.get_size().x) - 2
                 pos = cell.get_pixelpos()
 

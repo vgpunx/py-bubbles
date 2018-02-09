@@ -7,24 +7,26 @@ class Bubble(pygame.sprite.Sprite):
 
     def __init__(self, pos, bounds, radius, fill_color, stroke_color, *groups, angle=90, velocity=0):
         super().__init__(*groups)
-        self.image = pygame.transform.rotate(pygame.Surface((radius * 2, radius * 2)), -angle)
+        self.image = pygame.Surface((radius * 2, radius * 2))
         self.image.set_colorkey(pygame.Color('MAGENTA'))
-
-        offset = Vector2(radius, -radius).rotate(angle)
-        self.pos = Vector2(pos) - offset
-        self.velocity = Vector2(1, 0).rotate(angle) * velocity
-        self.angle = angle
         self.rect = self.image.get_rect(center=pos)
+
+        # movement
+        self.pos = Vector2(pos)
+        self.angle = angle
+        self.velocity = Vector2(1, 0).rotate(-self.angle) * velocity
         self.bounds = bounds
 
         # for drawing placeholder images
         # this will be replaced with actual image code later
         self.radius = radius
-        self.rect = self.image.get_rect()
         self.fill = pygame.Color(fill_color)
         self.stroke = pygame.Color(stroke_color)
 
         self.draw()
+
+    def set_velocity(self, velocity):
+        self.velocity = Vector2(1, 0).rotate(-self.angle) * velocity
 
     def add(self, *groups):
         super().add(*groups)
@@ -40,10 +42,9 @@ class Bubble(pygame.sprite.Sprite):
 
     def update(self, *args):
         super().update(*args)
-        if self.alive():
-            self.move()
-            self.rect.center = self.pos
-            self.bounce()
+        self.move()
+        self.bounce()
+        self.rect.center = self.pos
 
     def kill(self):
         super().kill()
@@ -65,43 +66,10 @@ class Bubble(pygame.sprite.Sprite):
         self.image.convert()
 
     def move(self):
-        # if self.angle <= 90:
-        #     radians = math.radians(self.angle)
-        #     self.pos[0] += int(math.cos(radians) * self.velocity)
-        #     self.pos[1] += int(math.sin(radians) * self.velocity * -1)
-        #
-        # elif self.angle > 90:
-        #     radians = math.radians(180 - self.angle)
-        #     self.pos[0] += int(math.cos(radians) * self.velocity * -1)
-        #     self.pos[1] += int(math.cos(radians) * self.velocity * -1)
-        #
-        # else:
-        #     self.pos[0] += 0
-        #     self.pos[1] += self.velocity * -1
+        # TODO: implement alive test
         self.pos += self.velocity
 
-        # if not self.bounds.contains(self.rect()):
-        #     self.kill()
-
     def bounce(self):
-        # 0deg is -->, 90 is ^
-        size = self.radius
-        aoi = self.angle  # angle of incidence
-        aor = 0
-
-        # vertical boundaries
-        if self.pos[0] + size >= self.bounds[0]:
-            aor = 0
-
-        # homarizontal boundaries
-        #     aoi = 360 - (aoi + 180)
-
-        if aoi >= 360:
-             aoi -= 360
-        elif aoi < 0:
-             aoi += 360
-
-        self.angle = aor
-
-    def set_velocity(self, velocity):
-        self.velocity = Vector2(1, 0).rotate(self.angle) * velocity
+        if self.rect.top >= self.bounds.top:
+            # this is not quite right, but close
+            self.velocity.reflect_ip(Vector2(self.bounds.left, self.bounds.right))
