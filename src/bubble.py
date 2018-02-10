@@ -22,11 +22,15 @@ class Bubble(pygame.sprite.Sprite):
         self.radius = radius
         self.fill = pygame.Color(fill_color)
         self.stroke = pygame.Color(stroke_color)
-
         self.draw()
 
     def set_velocity(self, velocity):
         self.velocity = Vector2(1, 0).rotate(-self.angle) * velocity
+
+    def set_angle(self, degrees):
+        self.angle = degrees
+        delta = self.velocity.angle_to(Vector2(1, 0).rotate(-self.angle))
+        self.velocity = self.velocity.rotate(delta)
 
     def add(self, *groups):
         super().add(*groups)
@@ -70,6 +74,12 @@ class Bubble(pygame.sprite.Sprite):
         self.pos += self.velocity
 
     def bounce(self):
-        if self.rect.top >= self.bounds.top:
-            # this is not quite right, but close
-            self.velocity.reflect_ip(Vector2(self.bounds.left, self.bounds.right))
+        bounce = False
+
+        if self.rect.top <= self.bounds.top:
+            norm = Vector2(self.bounds.top)
+            self.velocity = self.velocity.reflect(norm)
+            bounce = True
+
+        if bounce:
+            self.move()

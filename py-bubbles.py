@@ -52,8 +52,8 @@ def main():
         stroke_color='BLACK'
     )
 
+    test_bub.angle = 90
     test_bub.set_velocity(10)
-    test_bub.angle = 45
 
     clock = pygame.time.Clock()
 
