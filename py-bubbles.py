@@ -42,7 +42,7 @@ def main():
 
     b_start = list(playfield.hexmap.board.get('7, 9').get_pixelpos())
     b_start[0] = int(b_start[0] + (sur.get_size()[0] / 2) - b_start[0])
-    b_orig = b_start[1]
+    b_orig = b_start
 
     test_bub = Bubble(
         pos=b_start,
@@ -52,9 +52,11 @@ def main():
         stroke_color='BLACK'
     )
 
-    test_angle = 45
+    test_angle = 20
     test_bub.set_angle(test_angle)
     test_bub.set_velocity(10)
+
+    dirty_rects = []
 
     clock = pygame.time.Clock()
 
@@ -70,15 +72,16 @@ def main():
         )
 
         if not playfield.surface.get_rect().colliderect(test_bub.rect):
-            test_bub.set_position(b_start)
+            test_bub.set_position(b_orig)
             test_bub.set_angle(test_angle)
 
             if test_angle < 180:
-                test_angle += 1
+                test_angle += 5
             else:
-                test_angle = 0
+                test_angle = 20
 
         else:
+            dirty_rects.append(test_bub.rect)
             test_bub.update()
 
         # this is the event handler, which we should move to src.Control
@@ -90,6 +93,7 @@ def main():
         # update the display to show changes
         # in production, we will use "dirty rect" updating to improve performance
         pygame.display.update()
+        dirty_rects.clear()
 
         pygame.event.pump()
 

@@ -1,4 +1,3 @@
-import math
 import pygame
 from pygame.math import Vector2
 
@@ -34,6 +33,7 @@ class Bubble(pygame.sprite.Sprite):
 
     def set_position(self, coords: list):
         self.pos = Vector2(coords)
+        self.rect.center = self.pos
 
     def add(self, *groups):
         super().add(*groups)
@@ -91,3 +91,5 @@ class Bubble(pygame.sprite.Sprite):
         if bounce:
             self.velocity = self.velocity.reflect(norm)
             self.move(self.velocity)
+
+            # yes, i'm happy with this solution
