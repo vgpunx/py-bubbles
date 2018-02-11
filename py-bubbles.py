@@ -52,7 +52,8 @@ def main():
         stroke_color='BLACK'
     )
 
-    test_bub.angle = 90
+    test_angle = 45
+    test_bub.set_angle(test_angle)
     test_bub.set_velocity(10)
 
     clock = pygame.time.Clock()
@@ -68,10 +69,18 @@ def main():
             ((screen.get_size()[0] / 2) - PFLD_SIZE[0] / 2, (screen.get_size()[1] / 2) - PFLD_SIZE[1] / 2)
         )
 
-        if test_bub.pos[1] <= 0:
-            test_bub.pos[1] = b_orig
+        if not playfield.surface.get_rect().colliderect(test_bub.rect):
+            test_bub.set_position(b_start)
+            test_bub.set_angle(test_angle)
+
+            if test_angle < 180:
+                test_angle += 1
+            else:
+                test_angle = 0
+
         else:
             test_bub.update()
+
         # this is the event handler, which we should move to src.Control
         # this is where any graphical updates are blitted to the display
         for event in pygame.event.get():

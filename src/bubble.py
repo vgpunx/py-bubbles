@@ -32,6 +32,9 @@ class Bubble(pygame.sprite.Sprite):
         delta = self.velocity.angle_to(Vector2(1, 0).rotate(-self.angle))
         self.velocity = self.velocity.rotate(delta)
 
+    def set_position(self, coords: list):
+        self.pos = Vector2(coords)
+
     def add(self, *groups):
         super().add(*groups)
 
@@ -46,9 +49,8 @@ class Bubble(pygame.sprite.Sprite):
 
     def update(self, *args):
         super().update(*args)
-        self.move()
+        self.move(self.velocity)
         self.bounce()
-        self.rect.center = self.pos
 
     def kill(self):
         super().kill()
@@ -69,17 +71,23 @@ class Bubble(pygame.sprite.Sprite):
         pygame.draw.circle(self.image, self.stroke, self.image.get_rect().center, self.radius, 2)  # stroke
         self.image.convert()
 
-    def move(self):
+    def move(self, direction: pygame.math.Vector2):
+
         # TODO: implement alive test
-        self.pos += self.velocity
+        self.pos += direction
+        self.rect.center = self.pos
 
     def bounce(self):
         bounce = False
 
         if self.rect.top <= self.bounds.top:
-            norm = Vector2(self.bounds.top)
-            self.velocity = self.velocity.reflect(norm)
+            norm = Vector2(0, 1)
+            bounce = True
+
+        elif self.rect.left <= self.bounds.left or self.rect.right >= self.bounds.right:
+            norm = Vector2(1, 0)
             bounce = True
 
         if bounce:
-            self.move()
+            self.velocity = self.velocity.reflect(norm)
+            self.move(self.velocity)
