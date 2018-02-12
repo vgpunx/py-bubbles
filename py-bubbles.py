@@ -60,29 +60,29 @@ def main():
 
     clock = pygame.time.Clock()
 
+    playfield.update()
+
+
     while True:
         # paste the background
-        playfield.update()
-        sur.blit(test_bub.image, test_bub.rect)
-
         screen.blit(bg_orig, (0, 0))
         screen.blit(
             sur,
             ((screen.get_size()[0] / 2) - PFLD_SIZE[0] / 2, (screen.get_size()[1] / 2) - PFLD_SIZE[1] / 2)
         )
 
-        if not playfield.surface.get_rect().colliderect(test_bub.rect):
-            test_bub.set_position(b_orig)
-            test_bub.set_angle(test_angle)
+        # if not playfield.surface.get_rect().colliderect(test_bub.rect):
+        #     test_bub.set_position(b_orig)
+        #     test_bub.set_angle(test_angle)
+        #
+        #     if test_angle < 180:
+        #         test_angle += 5
+        #     else:
+        #         test_angle = 20
 
-            if test_angle < 180:
-                test_angle += 5
-            else:
-                test_angle = 20
+        # else:
+        #     test_bub.update()
 
-        else:
-            dirty_rects.append(test_bub.rect)
-            test_bub.update()
 
         # this is the event handler, which we should move to src.Control
         # this is where any graphical updates are blitted to the display
@@ -90,9 +90,13 @@ def main():
             if event.type == pygame.QUIT:
                 return
 
+            if event.type == pygame.KEYDOWN:
+                if pygame.KEYDOWN == K_SPACE:
+                    fire_test(playfield)
+
         # update the display to show changes
         # in production, we will use "dirty rect" updating to improve performance
-        pygame.display.update()
+        pygame.display.update(dirty_rects)
         dirty_rects.clear()
 
         pygame.event.pump()
@@ -102,6 +106,22 @@ def main():
 
     pygame.quit()
 
+
+def fire_test(playfield: Playfield):
+    b_start = list(playfield.hexmap.board.get('7, 9').get_pixelpos())
+    b_start[0] = int(b_start[0] + (playfield.get_surface().get_size()[0] / 2) - b_start[0])
+
+    playfield.active_bubbles.add(
+        Bubble(
+            pos=b_start,
+            bounds=playfield.get_surface().get_rect(),
+            radius=int(playfield.hexmap.cellsize[0] - 2),
+            fill_color='RED',
+            stroke_color='BLACK',
+            angle=45,
+            velocity=10
+        )
+    )
 
 if __name__ == "__main__":
     main()

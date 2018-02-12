@@ -25,12 +25,13 @@ class Playfield:
         self.hexmap = HexMap(surface_size, cell_size)
         self.size = int(cell_size[0] - 2)
         self.bubble_map = pygame.sprite.Group()
+        self.active_bubbles = pygame.sprite.Group()
 
     def update(self):
         self.surface.fill(pygame.Color(self.colorkey))
 
         try:
-            for bubble in self.bubble_map:
+            for bubble in self.bubble_map and self.active_bubbles:
                 bubble.update()
                 self.surface.blit(bubble.image, bubble.rect)
         except:

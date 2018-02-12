@@ -3,3 +3,5 @@
 *.pyc
 .idea/misc.xml
 .idea/py-bubbles.iml
+
+\.idea/codeStyles/codeStyleConfig\.xml
