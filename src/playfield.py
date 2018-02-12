@@ -1,4 +1,5 @@
 import math
+from itertools import chain
 import pygame
 import random
 from src.bubble import Bubble
@@ -31,7 +32,7 @@ class Playfield:
         self.surface.fill(pygame.Color(self.colorkey))
 
         try:
-            for bubble in self.bubble_map and self.active_bubbles:
+            for bubble in chain(self.bubble_map, self.active_bubbles):
                 bubble.update()
                 self.surface.blit(bubble.image, bubble.rect)
         except:

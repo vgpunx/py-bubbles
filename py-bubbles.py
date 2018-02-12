@@ -31,58 +31,27 @@ def main():
     # set up the background
     # simple solid fill for now
     # later, src.Playfield will handle this part
-    bg_orig = pygame.Surface(screen.get_size())
-    bg_orig = bg_orig.convert()
-    bg_orig.fill(pygame.Color('blue'))
+    background = pygame.Surface(screen.get_size())
+    background = background.convert()
+    background.fill(pygame.Color('blue'))
 
     playfield = Playfield(PFLD_SIZE, CELL_SIZE)
     playfield.load_map(os.path.join(os.curdir, 'maps', 'TEST_MAP0'))
-    sur = playfield.get_surface()
-    # sur.set_colorkey(pygame.Color('MAGENTA'))
 
-    b_start = list(playfield.hexmap.board.get('7, 9').get_pixelpos())
-    b_start[0] = int(b_start[0] + (sur.get_size()[0] / 2) - b_start[0])
-    b_orig = b_start
-
-    test_bub = Bubble(
-        pos=b_start,
-        bounds=sur.get_rect(),
-        radius=int(CELL_SIZE[0] - 2),
-        fill_color='RED',
-        stroke_color='BLACK'
-    )
-
-    test_angle = 20
-    test_bub.set_angle(test_angle)
-    test_bub.set_velocity(10)
-
-    dirty_rects = []
+    ball_angle = 20
 
     clock = pygame.time.Clock()
 
-    playfield.update()
-
-
     while True:
         # paste the background
-        screen.blit(bg_orig, (0, 0))
+        screen.blit(background, (0, 0))
+
+        # update the playfield and blit it
+        playfield.update()
         screen.blit(
-            sur,
+            playfield.get_surface(),
             ((screen.get_size()[0] / 2) - PFLD_SIZE[0] / 2, (screen.get_size()[1] / 2) - PFLD_SIZE[1] / 2)
         )
-
-        # if not playfield.surface.get_rect().colliderect(test_bub.rect):
-        #     test_bub.set_position(b_orig)
-        #     test_bub.set_angle(test_angle)
-        #
-        #     if test_angle < 180:
-        #         test_angle += 5
-        #     else:
-        #         test_angle = 20
-
-        # else:
-        #     test_bub.update()
-
 
         # this is the event handler, which we should move to src.Control
         # this is where any graphical updates are blitted to the display
@@ -91,13 +60,17 @@ def main():
                 return
 
             if event.type == pygame.KEYDOWN:
-                if pygame.KEYDOWN == K_SPACE:
-                    fire_test(playfield)
+                if event.key == pygame.K_SPACE:
+                    fire_test(playfield, ball_angle)
+
+                    if ball_angle < 160:
+                        ball_angle += 5
+                    else:
+                        ball_angle = 20
 
         # update the display to show changes
         # in production, we will use "dirty rect" updating to improve performance
-        pygame.display.update(dirty_rects)
-        dirty_rects.clear()
+        pygame.display.update()
 
         pygame.event.pump()
 
@@ -107,7 +80,7 @@ def main():
     pygame.quit()
 
 
-def fire_test(playfield: Playfield):
+def fire_test(playfield: Playfield, angle):
     b_start = list(playfield.hexmap.board.get('7, 9').get_pixelpos())
     b_start[0] = int(b_start[0] + (playfield.get_surface().get_size()[0] / 2) - b_start[0])
 
@@ -118,7 +91,7 @@ def fire_test(playfield: Playfield):
             radius=int(playfield.hexmap.cellsize[0] - 2),
             fill_color='RED',
             stroke_color='BLACK',
-            angle=45,
+            angle=angle,
             velocity=10
         )
     )
