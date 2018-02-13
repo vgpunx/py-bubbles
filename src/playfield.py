@@ -20,7 +20,7 @@ class Playfield:
         :type cell_size: Tuple(int, int)
         """
 
-        # self.colorkey = 'MAGENTA'
+        self.colorkey = 'WHITE'
         self.surface = pygame.Surface(surface_size)
         self.surface.convert()
         self.hexmap = HexMap(surface_size, cell_size)
