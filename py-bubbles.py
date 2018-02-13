@@ -36,7 +36,7 @@ def main():
     background.fill(pygame.Color('blue'))
 
     playfield = Playfield(PFLD_SIZE, CELL_SIZE)
-    playfield.load_map(os.path.join(os.curdir, 'maps', 'TEST_MAP0'))
+    playfield.load_map(os.path.join(os.curdir, 'maps', 'TEST_MAP0.JSON'))
 
     ball_angle = 20
 
@@ -50,6 +50,7 @@ def main():
         playfield.update()
         screen.blit(
             playfield.get_surface(),
+            # there has to be a more elegant way to align surfaces than this
             ((screen.get_size()[0] / 2) - PFLD_SIZE[0] / 2, (screen.get_size()[1] / 2) - PFLD_SIZE[1] / 2)
         )
 
