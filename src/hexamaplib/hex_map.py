@@ -1,17 +1,20 @@
 import math, collections, pygame
-from hex_cell import HexCell
+from src.hexamaplib.hex_cell import HexCell
 
 
 # TODO: Implement a HexMap class, incorporate the below methods, and write the damn docstrings
 class HexMap:
 
-    def __init__(self, pixelsize, hexsize, hex_orientation='flat'):
+    def __init__(self, surface_size, cellsize, hex_orientation='flat'):
 
         """
 
-        :param pixelsize: -> tuple
-        :param hexsize: -> tuple
-        :param hex_orientation: -> str
+        :param surface_size: Size of target Surface.
+        :type surface_size: Tuple
+        :param cellsize: Radii for hex cell size.
+        :type cellsize: Tuple
+        :param hex_orientation: Orientation of individual hexagon cells.
+        :type hex_orientation: str
         """
 
         self.Orientation = collections.namedtuple("Orientation",
@@ -20,10 +23,18 @@ class HexMap:
         self.Point = collections.namedtuple("Point", ["x", "y"])
         self.CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
 
-        self.pixelsize = pixelsize
-        self.hex_orientation = hex_orientation
+        self.surface_size = surface_size
+        self.hextype = str.lower(hex_orientation)
 
-        if hex_orientation == 'flat':
+        self.cellsize = self.Point(cellsize[0], cellsize[1])
+
+        # Calculate cell count from cell size and surface size:
+        # colcount = s / (Rc * 1.50)
+        # rowcount = s / (math.sqrt(3) / 2) * (Ri * 2)
+        colcount = self.cellsize.x * 1.5
+        rowcount = (math.sqrt(3) / 2) * (self.cellsize.x * 2)
+
+        if self.hextype == 'flat':
             self.hex_orientation = self.Orientation(
                 3.0 / 2.0,
                 0.0,
@@ -35,8 +46,11 @@ class HexMap:
                 math.sqrt(3.0) / 3.0,
                 0.0
             )
-            # TODO: Fix this.  The math still isn't quite right.
-        elif hex_orientation == 'pointy':
+
+            self.cellcount = self.Point(int(self.surface_size[0] / colcount),
+                                            int(self.surface_size[1] / rowcount))
+
+        elif self.hextype == 'pointy':
             self.hex_orientation = self.Orientation(
                 math.sqrt(3.0),
                 math.sqrt(3.0) / 2.0,
@@ -48,17 +62,12 @@ class HexMap:
                 2.0 / 3.0,
                 0.5
             )
+
+            self.cellcount = self.Point(int(self.surface_size[0] / rowcount),
+                                            int(self.surface_size[1] / colcount))
+
         else:
-            raise Exception('You must specify flat-topped or pointy-topped hexagons.')
-
-        self.hexsize = self.Point(hexsize[0], hexsize[1])
-
-        # total width of a hex is size * 2
-        # total height of a hex is math.sqrt(3)/2 * width
-        # spacing between hexes on the horizontal axis is width
-        hexwidth = int(self.hexsize.x * 1.5)
-        hexheight = int((math.sqrt(3) / 2) * (self.hexsize.x * 2))
-        self.hexcount = self.Point(int(self.pixelsize[0] / hexwidth), int(self.pixelsize[1] / hexheight))
+            raise Exception('Value of hex_orientation must be either "flat" or "pointy."')
 
         self.board = self.populate_board()
 
@@ -83,20 +92,20 @@ class HexMap:
 
         return hex_directions[direction]
 
-    def hex_neighbor(self, hex, direction):
+    def hex_neighbor(self, cell, direction):
         hex_directions = [self.CubeCoord(1, 0, -1), self.CubeCoord(1, -1, 0), self.CubeCoord(0, -1, 1),
                           self.CubeCoord(-1, 0, 1), self.CubeCoord(-1, 1, 0), self.CubeCoord(0, 1, -1)]
 
-        return self.hex_add(hex, hex_directions[direction])
+        return self.hex_add(cell, hex_directions[direction])
 
-    def hex_diagonal_neighbor(self, hex, direction):
+    def hex_diagonal_neighbor(self, cell, direction):
         hex_diagonals = [self.CubeCoord(2, -1, -1), self.CubeCoord(1, -2, 1), self.CubeCoord(-1, -1, 2),
                          self.CubeCoord(-2, 1, 1), self.CubeCoord(-1, 2, -1), self.CubeCoord(1, 1, -2)]
 
-        return self.hex_add(hex, hex_diagonals[direction])
+        return self.hex_add(cell, hex_diagonals[direction])
 
-    def hex_length(self, hex):
-        return (abs(hex.q) + abs(hex.r) + abs(hex.s)) // 2
+    def hex_length(self, cell):
+        return (abs(cell.q) + abs(cell.r) + abs(cell.s)) // 2
 
     def hex_distance(self, a, b):
         return self.hex_length(self.hex_subtract(a, b))
@@ -139,24 +148,24 @@ class HexMap:
         # r and q switch for flat or pointy
         if self.hex_orientation == 'pointy':
             # TODO: Fix this part, it's still not producing a rectangular map
-            for r in range(self.hexcount[0]):
+            for r in range(self.cellcount.y):
                 r_offset = int(math.floor(r / 2))
-                for q in range(-r_offset, (self.hexcount[1] - r_offset) - 1):
+                for q in range(-r_offset, (self.cellcount.x - r_offset) - 1):
                     # start in 0,0 + radius
                     board['{0}, {1}'.format(str(q), str(r))] = HexCell(
                         self.Point(q, r),
-                        self.Layout(self.hex_orientation, self.hexsize,
-                                    self.Point(1 + self.hexsize[0], 1 + self.hexsize[1]))
+                        self.Layout(self.hex_orientation, self.cellsize,
+                                    self.Point(self.cellsize[0], self.cellsize[1]))
                     )
         else:
-            for q in range(self.hexcount.x):
+            for q in range(self.cellcount.x):
                 q_offset = int(math.floor(q / 2))
-                for r in range(-q_offset, self.hexcount.y - q_offset):
+                for r in range(-q_offset, self.cellcount.y - q_offset):
                     # start in 0,0 + radius
                     board['{0}, {1}'.format(str(q), str(r))] = HexCell(
                         self.Point(q, r),
-                        self.Layout(self.hex_orientation, self.hexsize,
-                                    self.Point(0 + self.hexsize[0], 0 + self.hexsize[1]))
+                        self.Layout(self.hex_orientation, self.cellsize,
+                                    self.Point(0 + self.cellsize[0], 0 + self.cellsize[1]))
                     )
 
         return board

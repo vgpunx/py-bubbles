@@ -30,6 +30,9 @@ class HexCell(object):
         """
         return self.__cube_to_pixel__(self.layout, self.cubepos)
 
+    def get_size(self):
+        return self.layout.size
+
     def get_polygon_corners(self, layout, cubecoord):
         """
         Calculate the polygon corners of a hex object in PIXEL COORDINATES.
@@ -72,7 +75,7 @@ class HexCell(object):
         x = (M.f0 * cubecoord.q + M.f1 * cubecoord.r) * size.x
         y = (M.f2 * cubecoord.q + M.f3 * cubecoord.r) * size.y
 
-        return Point(x + origin.x, y + origin.y)
+        return Point(int(x + origin.x), int(y + origin.y))
 
     @staticmethod
     def __pixel_to_cube__(layout, pixel_coords):
@@ -101,5 +104,8 @@ class HexCell(object):
         pygame.draw.polygon(surface, pygame.Color(color), self.get_polygon_corners(self.layout, self.cubepos),
             width
         )
+        font = pygame.font.Font(pygame.font.get_default_font(), 10)
+        text = font.render('{0}, {1}'.format(self.axialpos.x, self.axialpos.y), False, pygame.Color("RED"))
+        surface.blit(text, (self.get_pixelpos().x - (text.get_size()[0] / 2), self.get_pixelpos().y))
 
         return surface
