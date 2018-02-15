@@ -32,8 +32,22 @@ class Playfield:
         self.surface.fill(pygame.Color(self.colorkey))
 
         try:
+            if len(self.active_bubbles) > 0:
+                fired_bubble = self.active_bubbles.sprites()[0]
+            else:
+                fired_bubble = None
+
             for bubble in chain(self.bubble_map, self.active_bubbles):
                 bubble.update()
+
+                if fired_bubble:
+                    if pygame.sprite.collide_circle(fired_bubble, bubble):
+                        #fired_bubble.set_velocity(0)
+                        # this code doesn't work
+                        print("collision with bubble at {0}".format(bubble.pos))
+                        self.bubble_map.add(fired_bubble)
+                        self.active_bubbles.remove(fired_bubble)
+
                 self.surface.blit(bubble.image, bubble.rect)
         except:
             raise
