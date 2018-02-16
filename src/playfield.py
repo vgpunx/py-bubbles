@@ -2,8 +2,8 @@ import math
 from itertools import chain
 import pygame
 import json
+from pygame.math import Vector2
 from src.bubble import Bubble
-
 from src.hexamaplib.hex_map import HexMap
 from pygame.locals import *
 
@@ -27,30 +27,42 @@ class Playfield:
         self.hexmap = HexMap(surface_size, cell_size)
         self.size = int(cell_size[0] - 2) # this is a magic number, we'll get a better radius method in optimization
         self.bubble_map = pygame.sprite.Group()
-        self.active_bubbles = pygame.sprite.Group()
+        self.active_bubble = pygame.sprite.GroupSingle()
 
     def update(self):
         self.surface.fill(pygame.Color(self.colorkey))
         pygame.draw.rect(self.surface, pygame.Color("WHITE"), self.surface.get_rect(), 5)
 
         try:
-            if len(self.active_bubbles) > 0:
-                fired_bubble = self.active_bubbles.sprites()[0]
-            else:
-                fired_bubble = None
+            if self.active_bubble:
+                mv = self.active_bubble.sprite
+                for bubble in self.bubble_map:
+                    if pygame.sprite.collide_circle(mv, bubble):
+                        mv.set_velocity(1)
 
-            for bubble in chain(self.bubble_map, self.active_bubbles):
-                bubble.update()
+                        # get current cell and lock bubble to it
+                        cur_cell = self.hexmap.get_celladdressbypixel(mv.rect.center)
+                        cur_cell_px_ctr = self.hexmap.get_pixeladdressbycell(cur_cell)
+                        # get the direction from current position to cell center
+                        dir_to = Vector2(mv.rect.center, cur_cell_px_ctr)
+                        ang_to = mv.velocity.angle_to(dir_to)  # need to convert this to absolute degrees
+                        if mv.rect.center != cur_cell_px_ctr:
+                            mv.velocity.rotate(ang_to)
 
-                if fired_bubble:
-                    if pygame.sprite.collide_circle(fired_bubble, bubble):
-                        #fired_bubble.set_velocity(0)
-                        # this code doesn't work
-                        print("collision with bubble at {0}".format(bubble.pos))
-                        self.bubble_map.add(fired_bubble)
-                        self.active_bubbles.remove(fired_bubble)
+                            #  this causes a hang
+                            while mv.rect.center != cur_cell_px_ctr:
+                                mv.update()
 
-                self.surface.blit(bubble.image, bubble.rect)
+                        mv.set_velocity(0)
+                        print("{0} -- {1}".format(mv.rect.center, cur_cell_px_ctr))
+
+                        self.bubble_map.add(mv)
+                        self.active_bubble.remove(mv)
+
+            for group in self.bubble_map, self.active_bubble:
+                group.update()
+                group.draw(self.surface)
+
         except:
             raise
 

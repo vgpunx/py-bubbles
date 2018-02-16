@@ -35,34 +35,10 @@ class Bubble(pygame.sprite.Sprite):
         self.pos = Vector2(coords)
         self.rect.center = self.pos
 
-    def add(self, *groups):
-        super().add(*groups)
-
-    def remove(self, *groups):
-        super().remove(*groups)
-
-    def add_internal(self, group):
-        super().add_internal(group)
-
-    def remove_internal(self, group):
-        super().remove_internal(group)
-
     def update(self, *args):
         super().update(*args)
         self.move(self.velocity)
         self.bounce()
-
-    def kill(self):
-        super().kill()
-
-    def groups(self):
-        return super().groups()
-
-    def alive(self):
-        return super().alive()
-
-    def __repr__(self):
-        return super().__repr__()
 
     def draw(self):
         # placeholder code
@@ -93,3 +69,29 @@ class Bubble(pygame.sprite.Sprite):
             self.move(self.velocity)
 
             # yes, i'm happy with this solution
+
+    # overload placeholders
+    def add(self, *groups):
+        super().add(*groups)
+
+    def remove(self, *groups):
+        super().remove(*groups)
+
+    def add_internal(self, group):
+        super().add_internal(group)
+
+    def remove_internal(self, group):
+        super().remove_internal(group)
+
+    def kill(self):
+        super().kill()
+
+    def groups(self):
+        return super().groups()
+
+    def alive(self):
+        return super().alive()
+
+    def __repr__(self):
+        return super().__repr__()
+
