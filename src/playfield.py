@@ -47,11 +47,11 @@ class Playfield:
                         dir_to = Vector2(mv.rect.center, cur_cell_px_ctr)
                         ang_to = mv.velocity.angle_to(dir_to)  # need to convert this to absolute degrees
                         if mv.rect.center != cur_cell_px_ctr:
-                            mv.velocity.rotate(ang_to)
 
-                            #  this causes a hang
-                            while mv.rect.center != cur_cell_px_ctr:
-                                mv.update()
+                            mv.set_velocity(10)
+                            mv.velocity.rotate_ip(ang_to)
+
+                            mv.update()
 
                         mv.set_velocity(0)
                         print("{0} -- {1}".format(mv.rect.center, cur_cell_px_ctr))
