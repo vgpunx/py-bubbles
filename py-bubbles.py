@@ -11,6 +11,12 @@ def main():
     PFLD_SIZE = (DISP_SIZE[0] * 0.65, DISP_SIZE[1] * 0.98)  # 65% scr width, 85% scr height
     CELL_SIZE = (PFLD_SIZE[0] / 23, PFLD_SIZE[0] / 23)  # Fit 15 bubbles across
 
+    ## PATHS
+    BGM_PATH = os.path.join(os.curdir, 'resource', 'audio', 'bgm')
+    SFX_PATH = os.path.join(os.curdir, 'resource', 'audio', 'sfx')
+    BGI_PATH = os.path.join(os.curdir, 'resource', 'image', 'bg')
+    SPR_PATH = os.path.join(os.curdir, 'resource', 'image', 'sprites')
+
     ## BUBBLE MAP
 
 
@@ -34,6 +40,14 @@ def main():
     background = pygame.Surface(screen.get_size())
     background = background.convert()
     background.fill(pygame.Color('blue'))
+
+    # load music
+    # this may need to move or use a variable to integrate level music later
+    pygame.mixer.music.load(os.path.join(BGM_PATH, 'test_music_drums.wav'))
+
+    # start playing the music
+    pygame.mixer.music.play(loops=-1, start=0.0)
+
 
     playfield = Playfield(PFLD_SIZE, CELL_SIZE)
     playfield.load_map(os.path.join(os.curdir, 'maps', 'TEST_MAP0.JSON'))
@@ -77,6 +91,10 @@ def main():
 
         # set framerate to no more than 60FPS
         clock.tick(60)
+
+    # stop music playback
+    # this will need to move later to the appropriate place based on design
+    pygame.mixer.music.stop()
 
     pygame.quit()
 
