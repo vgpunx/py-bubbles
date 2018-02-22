@@ -85,7 +85,7 @@ class HexMap:
         q = M.b0 * pt.x + M.b1 * pt.y
         r = M.b2 * pt.x + M.b3 * pt.y
 
-        return (q, r)
+        return (int(q), int(r))
 
     def get_pixeladdressbycell(self, cubecoord):
         """
