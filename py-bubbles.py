@@ -1,6 +1,7 @@
 import pygame, os
 from src.playfield import Playfield
 from src.bubble import Bubble
+from src.constants import *
 from pygame.locals import *
 
 
@@ -8,17 +9,17 @@ def main():
     ### CONSTANTS ###
 
     ## SIZE
-    DISP_SIZE = (800, 600)
-    PFLD_SIZE = (DISP_SIZE[0] * 0.65, DISP_SIZE[1] * 0.98)  # 65% scr width, 85% scr height
-    CELL_SIZE = (PFLD_SIZE[0] / 23, PFLD_SIZE[0] / 23)  # Fit 15 bubbles across
+    # DISP_SIZE = (800, 600)
+    # PFLD_SIZE = (DISP_SIZE[0] * 0.65, DISP_SIZE[1] * 0.98)  # 65% scr width, 85% scr height
+    # CELL_SIZE = (PFLD_SIZE[0] / 23, PFLD_SIZE[0] / 23)  # Fit 15 bubbles across
 
     ## COLORS
 
     ## PATHS
-    BGM_PATH = os.path.join(os.curdir, 'resource', 'audio', 'bgm')
-    SFX_PATH = os.path.join(os.curdir, 'resource', 'audio', 'sfx')
-    BGI_PATH = os.path.join(os.curdir, 'resource', 'image', 'bg')
-    SPR_PATH = os.path.join(os.curdir, 'resource', 'image', 'sprites')
+    # BGM_PATH = os.path.join(os.curdir, 'resource', 'audio', 'bgm')
+    # SFX_PATH = os.path.join(os.curdir, 'resource', 'audio', 'sfx')
+    # BGI_PATH = os.path.join(os.curdir, 'resource', 'image', 'bg')
+    # SPR_PATH = os.path.join(os.curdir, 'resource', 'image', 'sprites')
 
     # initialize pygame
     pygame.init()
