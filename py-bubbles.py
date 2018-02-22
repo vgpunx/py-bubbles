@@ -14,8 +14,11 @@ def main():
 
     ## COLORS
 
-    ## ALIGNMENT
-
+    ## PATHS
+    BGM_PATH = os.path.join(os.curdir, 'resource', 'audio', 'bgm')
+    SFX_PATH = os.path.join(os.curdir, 'resource', 'audio', 'sfx')
+    BGI_PATH = os.path.join(os.curdir, 'resource', 'image', 'bg')
+    SPR_PATH = os.path.join(os.curdir, 'resource', 'image', 'sprites')
 
     # initialize pygame
     pygame.init()
