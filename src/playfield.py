@@ -21,8 +21,7 @@ class Playfield:
         """
 
         self.colorkey = 'WHITE'
-        self.surface = pygame.Surface(surface_size)
-        self.surface.convert()
+        self.surface = pygame.Surface(surface_size).convert()
         self.hexmap = HexMap(surface_size, cell_size)
         self.size = int(cell_size[0] - 2) # this is a magic number, we'll get a better radius method in optimization
 
@@ -31,11 +30,18 @@ class Playfield:
         self.active_bubble = pygame.sprite.GroupSingle()
         self.disloc_bubbles = pygame.sprite.Group()
 
+        # debug
+        self.dbgsurf = pygame.Surface(surface_size)
+        self.dbgsurf.fill(pygame.Color(self.colorkey))
+        self.dbgsurf.convert()
+        for cell in self.hexmap.board.values():
+            cell.paint(self.dbgsurf, color="grey")
+
     def update(self):
         self.surface.fill(pygame.Color(self.colorkey))
+
         # debug
-        for cell in self.hexmap.board.values():
-            cell.paint(self.surface)
+        self.surface.blit(self.dbgsurf, (0, 0))
 
         try:
             if self.active_bubble:
@@ -46,8 +52,9 @@ class Playfield:
                         mv.set_velocity(1)
 
                         # get current cell and lock bubble to it
-                        cur_cell = self.hexmap.get_celladdressbypixel(mv.rect.center)
-                        col_cell = self.hexmap.get_celladdressbypixel(bubble.rect.center)
+                        ### BUG: this function returns the wrong cell most of the time ##
+                        cur_cell = self.hexmap.new_get_cellbypixel(mv.pos)
+                        col_cell = self.hexmap.new_get_cellbypixel(bubble.rect.center)
                         col_nbor = None  # need to implement hex_ring(hex) for this
                         cur_cell_px_ctr = self.hexmap.get_pixeladdressbycell(cur_cell)
                         # get the direction from current position to cell center
@@ -57,11 +64,12 @@ class Playfield:
                             # TODO: this *almost* works, but need to ensure the bubble anchors to at least 2 others
                             mv.set_velocity(0)
                             mv.velocity.rotate_ip(ang_to)
-                            mv.set_position(cur_cell_px_ctr)
+                            #mv.set_position(cur_cell_px_ctr)
                             mv.update()
 
                         mv.set_velocity(0)
-                        print("({0}) {1} -- ({2})".format(cur_cell, mv.rect.center, cur_cell_px_ctr))
+                        print(
+                            f"mv_rect_ctr: {mv.rect.center}\nmv_pos: {mv.pos}\nmv_cell: {cur_cell}\nmv_cell_size: {self.hexmap.cellsize}\nmv_cell_px_ctr: {cur_cell_px_ctr}\n\n")
 
                         self.bubble_map.add(mv)
                         self.active_bubble.remove(mv)

@@ -5,6 +5,7 @@ import pygame
 
 Point = collections.namedtuple("Point", ["x", "y"])
 CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
+Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
 
 
 # Definition of Orientation and Layout named tuples for reference only:
@@ -19,10 +20,11 @@ class HexCell(object):
 
     def __init__(self, axial_coords, layout) -> None:
         super().__init__()
-        self.Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
+        #self.Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
         self.axialpos = axial_coords
         self.cubepos = CubeCoord(axial_coords.x, axial_coords.y, -axial_coords.x - axial_coords.y)
         self.layout = layout
+        self.pixel_pos = self.__cube_to_pixel__(self.layout, self.cubepos)
 
     def get_pixelpos(self) -> Point:
         """
