@@ -80,10 +80,23 @@ class HexMap:
         """
         M = self.hex_orientation
         size = self.cellsize
-        origin = self.Point(0 + self.cellsize[0], 0 + self.cellsize[1])
+        origin = self.Point(0, 0)
         pt = self.Point((pixel_coords[0] - origin.x) / size.x, (pixel_coords[1] - origin.y) / size.y)
         q = M.b0 * pt.x + M.b1 * pt.y
         r = M.b2 * pt.x + M.b3 * pt.y
+
+        return (int(q), int(r))
+
+    def new_get_cellbypixel(self, pixel_coords):
+        radius = self.cellsize.x
+        width = self.cellsize.x * 2
+        x = (pixel_coords[0] - radius) / width
+        y = pixel_coords[1]
+
+        t1 = y / radius
+        t2 = math.floor(x + t1)
+        r = math.floor(math.floor(t1 - x) / 3)
+        q = math.floor((math.floor((2 * x) + 1) + t2) / 3)
 
         return (int(q), int(r))
 
@@ -96,12 +109,18 @@ class HexMap:
         """
         M = self.hex_orientation
         size = self.cellsize
-        origin = self.Point(0 + self.cellsize[0], 0 + self.cellsize[1])
+        origin = self.Point(0, 0)
         x = (M.f0 * cubecoord[0] + M.f1 * cubecoord[1]) * size.x
         y = (M.f2 * cubecoord[0] + M.f3 * cubecoord[1]) * size.y
 
         return (int(x + origin.x), int(y + origin.y))
 
+    def find_cell_by_pixel(self, pixel_address):
+        for cell in self.board.values():
+            if cell.pixel_pos == pixel_address:
+                return cell
+
+        return None
 
     def hex_add(self, a, b):
         return self.CubeCoord(a.q + b.q, a.r + b.r, a.s + b.s)
