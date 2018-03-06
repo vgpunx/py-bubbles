@@ -20,8 +20,9 @@ class Playfield:
         :type cell_size: Tuple(int, int)
         """
 
-        self.colorkey = 'WHITE'
+        self.colorkey = 'MAGENTA'
         self.surface = pygame.Surface(surface_size)
+        self.surface.set_colorkey(pygame.Color(self.colorkey))
         self.surface.convert()
         self.hexmap = HexMap(surface_size, cell_size)
         self.size = int(cell_size[0] - 2) # this is a magic number, we'll get a better radius method in optimization
@@ -30,6 +31,7 @@ class Playfield:
 
     def update(self):
         self.surface.fill(pygame.Color(self.colorkey))
+        pygame.draw.rect(self.surface, pygame.Color("WHITE"), self.surface.get_rect(), 5)
 
         try:
             for bubble in chain(self.bubble_map, self.active_bubbles):

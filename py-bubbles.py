@@ -6,6 +6,7 @@ from pygame.locals import *
 
 def main():
     ### CONSTANTS ###
+
     ## SIZE
     DISP_SIZE = (800, 600)
     PFLD_SIZE = (DISP_SIZE[0] * 0.65, DISP_SIZE[1] * 0.98)  # 65% scr width, 85% scr height
@@ -14,7 +15,7 @@ def main():
     ## PATHS
     BGM_PATH = os.path.join(os.curdir, 'resource', 'audio', 'bgm')
     SFX_PATH = os.path.join(os.curdir, 'resource', 'audio', 'sfx')
-    BGI_PATH = os.path.join(os.curdir, 'resource', 'image', 'bg')
+    BGI_PATH = os.path.join(os.curdir, 'resource', 'image', 'bkg')
     SPR_PATH = os.path.join(os.curdir, 'resource', 'image', 'sprites')
 
     ## BUBBLE MAP
@@ -37,15 +38,19 @@ def main():
     # set up the background
     # simple solid fill for now
     # later, src.Playfield will handle this part
+    test_bkg = pygame.image.load(os.path.join(BGI_PATH, 'test_bkg.jpg'))
+
     background = pygame.Surface(screen.get_size())
     background = background.convert()
-    background.fill(pygame.Color('blue'))
+    # background.fill(pygame.Color('blue'))
+    background = pygame.transform.scale(test_bkg, DISP_SIZE)
 
     # load music
     # this may need to move or use a variable to integrate level music later
     pygame.mixer.music.load(os.path.join(BGM_PATH, 'test_music_drums.wav'))
 
     # start playing the music
+    pygame.mixer.music.set_volume(0.5)
     pygame.mixer.music.play(loops=-1, start=0.0)
 
 
