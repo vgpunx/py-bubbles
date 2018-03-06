@@ -83,21 +83,23 @@ def main():
 
 
 def fire_test(playfield: Playfield, angle):
-    b_start = list(playfield.hexmap.board.get('7, 9').get_pixelpos())
+    b_start_addr = '7, 9'
+    b_start = list(playfield.hexmap.board.get(b_start_addr).get_pixelpos())
     b_start[0] = int(b_start[0] + (playfield.get_surface().get_size()[0] / 2) - b_start[0])
 
     if len(playfield.active_bubble) == 0:
-        playfield.active_bubble.add(
-            Bubble(
-                pos=b_start,
-                bounds=playfield.get_surface().get_rect(),
-                radius=int(playfield.hexmap.cellsize[0] - 2),
-                fill_color='RED',
-                stroke_color='BLACK',
-                angle=angle,
-                velocity=10
-            )
-    )
+        fire = Bubble(
+            address=b_start_addr,
+            pos=b_start,
+            bounds=playfield.get_surface().get_rect(),
+            radius=int(playfield.hexmap.cellsize[0] - 2),
+            fill_color='RED',
+            stroke_color='BLACK',
+            angle=angle,
+            velocity=10
+        )
+        playfield.active_bubble.add(fire)
+        playfield.all_sprites.add(fire)
 
 if __name__ == "__main__":
     main()

@@ -26,8 +26,10 @@ class Playfield:
         self.size = int(cell_size[0] - 2) # this is a magic number, we'll get a better radius method in optimization
 
         # sprite groups
+        self.all_sprites = pygame.sprite.Group()
         self.bubble_map = pygame.sprite.Group()
         self.active_bubble = pygame.sprite.GroupSingle()
+        self.next_bubble = pygame.sprite.GroupSingle()
         self.disloc_bubbles = pygame.sprite.Group()
 
         # debug
@@ -47,36 +49,24 @@ class Playfield:
             if self.active_bubble:
                 mv = self.active_bubble.sprite
                 # TODO: replace this loop with a method that returns the colliding sprite list
-                for bubble in self.bubble_map:
-                    if pygame.sprite.collide_circle(mv, bubble):
-                        mv.set_velocity(1)
+                collision_list = pygame.sprite.spritecollide(mv, self.bubble_map, False)
 
-                        # get current cell and lock bubble to it
-                        ### BUG: this function returns the wrong cell most of the time ##
-                        cur_cell = self.hexmap.new_get_cellbypixel(mv.pos)
-                        col_cell = self.hexmap.new_get_cellbypixel(bubble.rect.center)
-                        col_nbor = None  # need to implement hex_ring(hex) for this
-                        cur_cell_px_ctr = self.hexmap.get_pixeladdressbycell(cur_cell)
-                        # get the direction from current position to cell center
-                        dir_to = Vector2(mv.rect.center, cur_cell_px_ctr)
-                        ang_to = mv.velocity.angle_to(dir_to)  # need to convert this to absolute degrees
-                        if mv.rect.center != cur_cell_px_ctr:
-                            # TODO: this *almost* works, but need to ensure the bubble anchors to at least 2 others
-                            mv.set_velocity(0)
-                            mv.velocity.rotate_ip(ang_to)
-                            #mv.set_position(cur_cell_px_ctr)
-                            mv.update()
+                if collision_list:
+                    # the idea here is to slow down, find the direction to the nearest sprite,
+                    # and move the sprite until it touches at least two others
+                    mv.set_velocity(0)
 
-                        mv.set_velocity(0)
-                        print(
-                            f"mv_rect_ctr: {mv.rect.center}\nmv_pos: {mv.pos}\nmv_cell: {cur_cell}\nmv_cell_size: {self.hexmap.cellsize}\nmv_cell_px_ctr: {cur_cell_px_ctr}\n\n")
+                    mv.grid_address = self.hexmap.get_celladdressbypixel(mv.rect.center)
+                    # get cell containing colliding sprite
+                    print(mv.grid_address)
 
-                        self.bubble_map.add(mv)
-                        self.active_bubble.remove(mv)
+                    # move the active bubble to the map
+                    self.bubble_map.add(mv)
+                    self.active_bubble.remove(mv)
 
-            for group in self.bubble_map, self.active_bubble:
-                group.update()
-                group.draw(self.surface)
+            # update and paint everything
+            self.all_sprites.update()
+            self.all_sprites.draw(self.surface)
 
         except:
             raise
@@ -98,6 +88,7 @@ class Playfield:
                     # later, the ADDRESS : TYPE json approach will be used to decide which sprite
                     # graphic to load and what special properties (if any) the bubble might have
                     Bubble(
+                        address,
                         self.hexmap.board.get(address).get_pixelpos(),
                         self.surface.get_rect(),
                         self.size,
@@ -105,5 +96,7 @@ class Playfield:
                         'BLACK'
                     )
                 )
+
+            self.all_sprites.add(self.bubble_map)
         except:
             raise
