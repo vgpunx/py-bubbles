@@ -36,7 +36,7 @@ def main():
     screen.set_colorkey(pygame.Color('MAGENTA'))
 
     # set up the background
-    # simple solid fill for now
+    # test background for now
     # later, src.Playfield will handle this part
     test_bkg = pygame.image.load(os.path.join(BGI_PATH, 'test_bkg.jpg'))
 
