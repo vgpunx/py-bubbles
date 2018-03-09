@@ -36,15 +36,15 @@ class HexMap:
 
         if self.hextype == 'flat':
             self.hex_orientation = self.Orientation(
-                3.0 / 2.0,
-                0.0,
-                math.sqrt(3.0) / 2.0,
-                math.sqrt(3.0),
-                2.0 / 3.0,
-                0.0,
-                -1.0 / 3.0,
-                math.sqrt(3.0) / 3.0,
-                0.0
+                3.0 / 2.0,              # f0
+                0.0,                    # f1
+                math.sqrt(3.0) / 2.0,   # f2
+                math.sqrt(3.0),         # f3
+                2.0 / 3.0,              # b0
+                0.0,                    # b1
+                -1.0 / 3.0,             # b2
+                math.sqrt(3.0) / 3.0,   # b3
+                0.0                     # start_angle
             )
 
             self.cellcount = self.Point(int(self.surface_size[0] / colcount),
@@ -81,24 +81,13 @@ class HexMap:
         M = self.hex_orientation
         size = self.cellsize
         origin = self.Point(0, 0)
-        pt = self.Point((pixel_coords[0] - origin.x) / size.x, (pixel_coords[1] - origin.y) / size.y)
-        q = M.b0 * pt.x + M.b1 * pt.y
-        r = M.b2 * pt.x + M.b3 * pt.y
+        pt = self.Point((pixel_coords[0] - origin.x) // size.x, (pixel_coords[1] - origin.y) // size.y)
+        q = (M.b0 * pt.x) + (M.b1 * pt.y)
+        r = (M.b2 * pt.x) + (M.b3 * pt.y)
 
-        return (int(q), int(r))
+        rslt = self.hex_round(self.CubeCoord(q, r, -q - r))
 
-    def new_get_cellbypixel(self, pixel_coords):
-        radius = self.cellsize.x
-        width = self.cellsize.x * 2
-        x = (pixel_coords[0] - radius) / width
-        y = pixel_coords[1]
-
-        t1 = y / radius
-        t2 = math.floor(x + t1)
-        r = math.floor(math.floor(t1 - x) / 3)
-        q = math.floor((math.floor((2 * x) + 1) + t2) / 3)
-
-        return (int(q), int(r))
+        return (rslt.q, rslt.r)
 
     def get_pixeladdressbycell(self, cubecoord):
         """
@@ -171,11 +160,10 @@ class HexMap:
 
         if q_diff > r_diff and q_diff > s_diff:
             q = -r - s
+        elif r_diff > s_diff:
+            r = -q - s
         else:
-            if r_diff > s_diff:
-                r = -q - s
-            else:
-                s = -q - r
+            s = -q - r
 
         return self.CubeCoord(q, r, s)
 
