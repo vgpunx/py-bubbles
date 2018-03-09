@@ -58,7 +58,7 @@ class Playfield:
 
                     mv.grid_address = self.hexmap.get_celladdressbypixel(mv.rect.center)
                     # get cell containing colliding sprite
-                    print(mv.grid_address)
+                    print("pixel_pos: {mv.grid_address}; grid_pos: {mv.}")
 
                     # move the active bubble to the map
                     self.bubble_map.add(mv)
