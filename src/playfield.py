@@ -45,6 +45,8 @@ class Playfield:
         # debug
         self.surface.blit(self.dbgsurf, (0, 0))
 
+        self.all_sprites.update()
+
         try:
             if self.active_bubble:
                 mv = self.active_bubble.sprite
@@ -52,20 +54,27 @@ class Playfield:
                 collision_list = pygame.sprite.spritecollide(mv, self.bubble_map, False)
 
                 if collision_list:
-                    # the idea here is to slow down, find the direction to the nearest sprite,
-                    # and move the sprite until it touches at least two others
-                    mv.set_velocity(0)
+                    # keep going until circle collision
+                    for spr in collision_list:
+                        print("rect collision with: {0}".format(spr.rect.center))
+                        if pygame.sprite.collide_circle(mv, spr):
+                            # the idea here is to slow down, find the direction to the nearest sprite,
+                            # and move the sprite until it touches at least two others
+                            print("circ collision with: {0}".format(spr.rect.center))
+                            mv.set_velocity(0)
 
-                    mv.grid_address = self.hexmap.get_celladdressbypixel(mv.rect.center)
-                    # get cell containing colliding sprite
-                    print("pixel_pos: {mv.grid_address}; grid_pos: {mv.}")
+                            # move the active bubble to the map
+                            self.bubble_map.add(mv)
+                            self.active_bubble.remove(mv)
 
-                    # move the active bubble to the map
-                    self.bubble_map.add(mv)
-                    self.active_bubble.remove(mv)
+                            mv.grid_address = self.hexmap.get_celladdressbypixel(mv.rect.center)
+                            # get cell containing colliding sprite
+                            print("pixel_pos: {1}; grid_pos: {0}".format(mv.grid_address, mv.pos))
+                            continue
+                        else:
+                            continue
 
             # update and paint everything
-            self.all_sprites.update()
             self.all_sprites.draw(self.surface)
 
         except:
