@@ -1,4 +1,5 @@
 import math, collections, pygame
+import decimal
 from src.hexamaplib.hex_cell import HexCell
 
 
@@ -81,7 +82,7 @@ class HexMap:
         M = self.hex_orientation
         size = self.cellsize
         origin = self.Point(0, 0)
-        pt = self.Point((pixel_coords[0] - origin.x) // size.x, (pixel_coords[1] - origin.y) // size.y)
+        pt = self.Point((pixel_coords[0] - origin.x) / size.x, (pixel_coords[1] - origin.y) / size.y)
         q = (M.b0 * pt.x) + (M.b1 * pt.y)
         r = (M.b2 * pt.x) + (M.b3 * pt.y)
 
@@ -150,20 +151,22 @@ class HexMap:
     def hex_distance(self, a, b):
         return self.hex_length(self.hex_subtract(a, b))
 
-    def hex_round(self, h):
-        q = int(round(h.q))
-        r = int(round(h.r))
-        s = int(round(h.s))
-        q_diff = abs(q - h.q)
-        r_diff = abs(r - h.r)
-        s_diff = abs(s - h.s)
+    def hex_round(self, cell):
+        q = int(cell.q)
+        r = int(cell.r)
+        s = int(cell.s)
+        q_diff = abs(q - cell.q)
+        r_diff = abs(r - cell.r)
+        s_diff = abs(s - cell.s)
 
-        if q_diff > r_diff and q_diff > s_diff:
-            q = -r - s
-        elif r_diff > s_diff:
-            r = -q - s
-        else:
-            s = -q - r
+        if q + r + s != 0:
+            if q_diff > r_diff and q_diff > s_diff:
+                q = -r - s
+            else:
+                if r_diff > s_diff:
+                    r = -q - s
+                else:
+                    s = -q - r
 
         return self.CubeCoord(q, r, s)
 
