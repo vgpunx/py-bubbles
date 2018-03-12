@@ -1,7 +1,7 @@
 import math
-from itertools import chain
 import pygame
 import json
+import collections
 from pygame.math import Vector2
 from src.bubble import Bubble
 from src.hexamaplib.hex_map import HexMap
@@ -50,29 +50,53 @@ class Playfield:
         try:
             if self.active_bubble:
                 mv = self.active_bubble.sprite
-                # TODO: replace this loop with a method that returns the colliding sprite list
                 collision_list = pygame.sprite.spritecollide(mv, self.bubble_map, False)
 
                 if collision_list:
                     # keep going until circle collision
                     for spr in collision_list:
+                        #  debug
                         print("rect collision with: {0}".format(spr.rect.center))
+
                         if pygame.sprite.collide_circle(mv, spr):
                             # the idea here is to slow down, find the direction to the nearest sprite,
                             # and move the sprite until it touches at least two others
-                            print("circ collision with: {0}".format(spr.rect.center))
+
+                            # debug
+                            print("circ collision with: {0}".format(spr.grid_address))
                             mv.set_velocity(0)
 
+                            # get the address of the colliding sprite
+                            # and calculate our address based on it
+                            spr_neighbors = self.hexmap.hex_allneighbors(spr.grid_address)
+                            mv_cur_address = self.hexmap.get_celladdressbypixel(mv.rect.center)
+
+                            if mv_cur_address not in spr_neighbors:
+                                print("ROUND_ERROR")
+                                # make small adjustments to addr until true
+                                for i in (1, -1):
+                                    test0 = (mv_cur_address[0] + i, mv_cur_address[1])
+                                    test1 = (mv_cur_address[0], mv_cur_address[1] + i)
+                                    if test0 in spr_neighbors:
+                                        mv_cur_address = test0
+                                        break
+                                    elif test1 in spr_neighbors:
+                                        mv_cur_address = test1
+                                        break
+
+                            mv.grid_address = mv_cur_address
+                            mv.set_position(self.hexmap.board.get(mv.grid_address).pixel_pos)
                             # move the active bubble to the map
                             self.bubble_map.add(mv)
                             self.active_bubble.remove(mv)
 
-                            mv.grid_address = self.hexmap.get_celladdressbypixel(mv.rect.center)
                             # get cell containing colliding sprite
+
+                            # debug
+                            print(spr_neighbors)
                             print("pixel_pos: {1}; grid_pos: {0}".format(mv.grid_address, mv.pos))
-                            continue
-                        else:
-                            continue
+
+                        continue
 
             # update and paint everything
             self.all_sprites.draw(self.surface)
@@ -92,12 +116,14 @@ class Playfield:
 
         try:
             for address in map_dict:
+                addr = address.split(", ")
+                addr = (int(addr[0]), int(addr[1]))
                 self.bubble_map.add(
                     # this is test code for now, just drawing bubbles with primitives
                     # later, the ADDRESS : TYPE json approach will be used to decide which sprite
                     # graphic to load and what special properties (if any) the bubble might have
                     Bubble(
-                        address,
+                        addr,
                         self.hexmap.board.get(address).get_pixelpos(),
                         self.surface.get_rect(),
                         self.size,
