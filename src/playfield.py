@@ -55,25 +55,14 @@ class Playfield:
                 if collision_list:
                     # keep going until circle collision
                     for spr in collision_list:
-                        #  debug
-                        print("rect collision with: {0}".format(spr.rect.center))
-
                         if pygame.sprite.collide_circle(mv, spr):
                             # the idea here is to slow down, find the direction to the nearest sprite,
                             # and move the sprite until it touches at least two others
-
-                            # debug
-                            print("circ collision with: {0}".format(spr.grid_address))
-                            mv.set_velocity(0)
-
-                            # get the address of the colliding sprite
-                            # and calculate our address based on it
                             spr_neighbors = self.hexmap.hex_allneighbors(spr.grid_address)
                             mv_cur_address = self.hexmap.get_celladdressbypixel(mv.rect.center)
 
                             if mv_cur_address not in spr_neighbors:
-                                print("ROUND_ERROR")
-                                # make small adjustments to addr until true
+                                # make small adjustments to addr until we find the correct one
                                 for i in (1, -1):
                                     test0 = (mv_cur_address[0] + i, mv_cur_address[1])
                                     test1 = (mv_cur_address[0], mv_cur_address[1] + i)
@@ -84,8 +73,15 @@ class Playfield:
                                         mv_cur_address = test1
                                         break
 
+                            # now that we know where we're supposed to be
+                            # figure out how to get there
                             mv.grid_address = mv_cur_address
-                            mv.set_position(self.hexmap.board.get(mv.grid_address).pixel_pos)
+                            dest_cell = self.hexmap.board.get(mv.grid_address)
+
+                            angle_to = mv.velocity.angle_to(Vector2(dest_cell.get_pixelpos()))
+                            mv.set_position(dest_cell.get_pixelpos())
+
+                            mv.set_velocity(0)
                             # move the active bubble to the map
                             self.bubble_map.add(mv)
                             self.active_bubble.remove(mv)
@@ -123,12 +119,15 @@ class Playfield:
                     # later, the ADDRESS : TYPE json approach will be used to decide which sprite
                     # graphic to load and what special properties (if any) the bubble might have
                     Bubble(
-                        addr,
-                        self.hexmap.board.get(address).get_pixelpos(),
-                        self.surface.get_rect(),
-                        self.size,
-                        map_dict.get(address),
-                        'BLACK'
+                        addr,                                        # adress
+                        self.hexmap.board.get(addr).get_pixelpos(),  # pixelpos
+                        self.surface.get_rect(),                     # bounds
+                        self.size,                                   # radius
+                        map_dict.get(address),                       # fill_color
+                        'BLACK',                                     # stroke_color
+                        180,                                         # angle
+                        0,                                           # velocity
+                        (self.bubble_map, self.all_sprites)          # *groups
                     )
                 )
 
