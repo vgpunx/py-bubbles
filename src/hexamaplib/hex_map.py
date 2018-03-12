@@ -1,5 +1,4 @@
 import math, collections, pygame
-import decimal
 from src.hexamaplib.hex_cell import HexCell
 
 
@@ -115,8 +114,24 @@ class HexMap:
     def hex_add(self, a, b):
         return self.CubeCoord(a.q + b.q, a.r + b.r, a.s + b.s)
 
+    def axial_add(self, a, b):
+        a_cube = self.CubeCoord(a[0], a[1], -a[0] - a[1])
+        b_cube = self.CubeCoord(b[0], b[1], -b[0] - b[1])
+
+        cube_res = self.hex_add(a_cube, b_cube)
+
+        return cube_res.q, cube_res.r
+
     def hex_subtract(self, a, b):
         return self.CubeCoord(a.q - b.q, a.r - b.r, a.s - b.s)
+
+    def axial_subtract(self, a, b):
+        a_cube = self.CubeCoord(a[0], a[1], -a[0] - a[1])
+        b_cube = self.CubeCoord(b[0], b[1], -b[0] - b[1])
+
+        cube_res = self.hex_subtract(a_cube, b_cube)
+
+        return cube_res.q, cube_res.r
 
     def hex_scale(self, a, k):
         return self.CubeCoord(a.q * k, a.r * k, a.s * k)
@@ -138,6 +153,16 @@ class HexMap:
                           self.CubeCoord(-1, 0, 1), self.CubeCoord(-1, 1, 0), self.CubeCoord(0, 1, -1)]
 
         return self.hex_add(cell, hex_directions[direction])
+
+    def hex_allneighbors(self, cell):
+        cell_cube = self.CubeCoord(cell[0], cell[1], -cell[0] - cell[1])
+        result = []
+
+        for i in range(6):
+            c = self.hex_neighbor(cell_cube, i)
+            result.append((c.q, c.r))
+
+        return result
 
     def hex_diagonal_neighbor(self, cell, direction):
         hex_diagonals = [self.CubeCoord(2, -1, -1), self.CubeCoord(1, -2, 1), self.CubeCoord(-1, -1, 2),
@@ -204,7 +229,7 @@ class HexMap:
                 q_offset = int(math.floor(q / 2))
                 for r in range(-q_offset, self.cellcount.y - q_offset):
                     # start in 0,0 + radius
-                    board['{0}, {1}'.format(str(q), str(r))] = HexCell(
+                    board[(q, r)] = HexCell(
                         self.Point(q, r),
                         self.Layout(self.hex_orientation, self.cellsize,
                                     self.Point(0 + self.cellsize[0], 0 + self.cellsize[1]))
