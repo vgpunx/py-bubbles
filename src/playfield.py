@@ -83,29 +83,14 @@ class Playfield:
                                 mv_cur_address = test1
                                 break
 
-                    # now that we know where we're supposed to be
-                    # figure out how to get there
                     mv.grid_address = mv_cur_address
                     dest_cell = self.hexmap.board.get(mv.grid_address)
 
-                    angl_to = mv.velocity.angle_to(Vector2(dest_cell.get_pixelpos()))
-                    dist_to = mv.velocity.distance_to(Vector2(dest_cell.get_pixelpos()))
-
-                    if round(dist_to) > 0:
-                        # hm.  only want to do this once...
-                        if round(angl_to) > 0:
-                            mv.set_angle(mv.angle + angl_to)
-
-                        if dist_to % 3 == 0:
-                            mv.set_velocity(3)
-                        else:
-                            mv.set_velocity(2)
-                    else:
-                        mv.set_velocity(0)
-                        mv.set_pos(dest_cell.get_pixelpos())
-                        # move the active bubble to the map
-                        self.bubble_map.add(mv)
-                        self.active_bubble.remove(mv)
+                    mv.set_velocity(0)
+                    mv.set_position(dest_cell.get_pixelpos())
+                    # move the active bubble to the map
+                    self.bubble_map.add(mv)
+                    self.active_bubble.remove(mv)
 
                 continue
 
