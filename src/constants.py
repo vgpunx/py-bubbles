@@ -10,5 +10,5 @@ CELL_SIZE = (PFLD_SIZE[0] / 23, PFLD_SIZE[0] / 23)  # Fit 15 bubbles across
 ## PATHS ##
 BGM_PATH = os.path.join(os.curdir, 'resource', 'audio', 'bgm')
 SFX_PATH = os.path.join(os.curdir, 'resource', 'audio', 'sfx')
-BGI_PATH = os.path.join(os.curdir, 'resource', 'image', 'bg')
+BGI_PATH = os.path.join(os.curdir, 'resource', 'image', 'bkg')
 SPR_PATH = os.path.join(os.curdir, 'resource', 'image', 'sprites')
