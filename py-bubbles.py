@@ -45,7 +45,7 @@ def main():
     pygame.mixer.music.load(os.path.join(BGM_PATH, 'test_music_drums.wav'))
 
     # start playing the music
-    pygame.mixer.music.set_volume(0.5)
+    pygame.mixer.music.set_volume(0.2)
     pygame.mixer.music.play(loops=-1, start=0.0)
 
 
