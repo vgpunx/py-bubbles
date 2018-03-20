@@ -23,7 +23,7 @@ def main():
 
     # now the hex stuff
     hexsize = (20, 20)
-    cell_or = 'flat'
+    cell_or = 'pointy'
 
     hexmap = hex_map.HexMap(screensize, hexsize, hex_orientation=cell_or)
     counter = 0
