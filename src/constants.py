@@ -4,7 +4,7 @@ from src.settings import Settings
 __all__ = [
     "DISP_SIZE", "PFLD_SIZE", "CELL_SIZE", "DISP_FSCR", "BGM_PATH", "SFX_PATH", "BGI_PATH", "SPR_PATH",
     "BGM_ENABLED", "SFX_ENABLED", "SFX_VOLUME", "BGM_VOLUME", "INPUT_DEV", "MV_UP", "MV_LEFT", "MV_DOWN",
-    "MV_RIGHT", "ACCEPT", "CANCEL"
+    "MV_RIGHT", "ACCEPT", "CANCEL", "config"
     ]
 
 ## GROK THE CONFIG FILE ##
