@@ -7,6 +7,7 @@ class Settings(configparser.ConfigParser):
         configparser.ConfigParser.__init__(self)
         # save the conf file path
         self.configFilePath = filepath
+        self.load()
 
     def load(self):
         if not os.path.exists(self.configFilePath):
@@ -26,12 +27,14 @@ class Settings(configparser.ConfigParser):
         conf = {
             'INPUT': {
                 'inputdevice': 'keyboard',
-                'moveleft': 'K_A',
-                'moveright': 'K_D',
-                'accept': 'K_SPACE',
-                'cancel': 'K_ESCAPE'
+                'moveup': 'W',
+                'moveleft': 'A',
+                'movedown': 'S',
+                'moveright': 'D',
+                'accept': 'SPACE',
+                'cancel': 'ESCAPE'
             },
-            'VIDEO': {'displaysize': '800, 600', 'fullscreen': 'True'},
+            'VIDEO': {'display_width': '800', 'display_height': '600', 'fullscreen': 'True'},
             'AUDIO': {'sfx_enabled': 'True', 'sfx_volume': '100', 'bgm_enabled': 'True', 'bgm_volume': '100'}
         }
 
