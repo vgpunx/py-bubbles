@@ -50,7 +50,8 @@ class HexMap:
                 0.0                     # start_angle
             )
 
-            self.cellcount = self.Point(self.surface_size[0] // colcount, self.surface_size[1] // rowcount)
+            self.cellcount = self.Point(int(self.surface_size[0] // colcount),
+                                        int(self.surface_size[1] // rowcount))
 
         elif self.hextype == 'pointy':
             self.hex_orientation = self.Orientation(
@@ -65,7 +66,8 @@ class HexMap:
                 0.5                     # start_angle
             )
 
-            self.cellcount = self.Point(self.surface_size[0] // rowcount, self.surface_size[1] // colcount)
+            self.cellcount = self.Point(int(self.surface_size[0] // rowcount),
+                                        int(self.surface_size[1] // colcount))
 
         else:
             raise Exception('Value of hex_orientation must be either "flat" or "pointy."')
