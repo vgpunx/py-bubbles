@@ -35,19 +35,18 @@ def main():
     # later, src.Playfield will handle this part
     test_bkg = pygame.image.load(os.path.join(BGI_PATH, 'test_bkg.jpg'))
 
-    background = pygame.Surface(screen.get_size())
-    background = background.convert()
+    #background = pygame.Surface(screen.get_size()).convert()
     # background.fill(pygame.Color('blue'))
-    background = pygame.transform.scale(test_bkg, DISP_SIZE)
+    background = pygame.transform.scale(test_bkg, DISP_SIZE).convert()
 
     # load music
     # this may need to move or use a variable to integrate level music later
     pygame.mixer.music.load(os.path.join(BGM_PATH, 'test_music_drums.wav'))
 
     # start playing the music
-    pygame.mixer.music.set_volume(0.2)
-    pygame.mixer.music.play(loops=-1, start=0.0)
-
+    if BGM_ENABLED:
+        pygame.mixer.music.set_volume(BGM_VOLUME)
+        pygame.mixer.music.play(loops=-1, start=0.0)
 
     playfield = Playfield(PFLD_SIZE, CELL_SIZE)
     playfield.load_map(os.path.join(os.curdir, 'maps', 'TEST_MAP0.JSON'))

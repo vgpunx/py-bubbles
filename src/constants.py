@@ -1,5 +1,5 @@
 import os
-from settings import Settings
+from src.settings import Settings
 
 __all__ = [
     "DISP_SIZE", "PFLD_SIZE", "CELL_SIZE", "DISP_FSCR", "BGM_PATH", "SFX_PATH", "BGI_PATH", "SPR_PATH",
@@ -8,7 +8,7 @@ __all__ = [
     ]
 
 ## GROK THE CONFIG FILE ##
-config = Settings(os.path.join(os.pardir, 'config.ini'))  # config file location hardcoding is intentional
+config = Settings(os.path.join(os.curdir, 'config.ini'))  # config file location hardcoding is intentional
 
 ## DISPLAY ##
 DISP_SIZE = (config['VIDEO'].getint('display_width'), config['VIDEO'].getint('display_height'))
