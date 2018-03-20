@@ -33,17 +33,17 @@ class Playfield:
         self.disloc_bubbles = pygame.sprite.Group()
 
         # debug
-        self.dbgsurf = pygame.Surface(surface_size)
-        self.dbgsurf.fill(pygame.Color(self.colorkey))
-        self.dbgsurf.convert()
-        for cell in self.hexmap.board.values():
-            cell.paint(self.dbgsurf, color="grey")
+        # self.dbgsurf = pygame.Surface(surface_size)
+        # self.dbgsurf.fill(pygame.Color(self.colorkey))
+        # self.dbgsurf.convert()
+        # for cell in self.hexmap.board.values():
+        #     cell.paint(self.dbgsurf, color="grey")
 
     def update(self):
         self.surface.fill(pygame.Color(self.colorkey))
 
         # debug
-        self.surface.blit(self.dbgsurf, (0, 0))
+        # self.surface.blit(self.dbgsurf, (0, 0))
 
         self.all_sprites.update()
 
