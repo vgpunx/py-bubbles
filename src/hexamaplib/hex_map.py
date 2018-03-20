@@ -24,15 +24,18 @@ class HexMap:
         self.CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
 
         self.surface_size = surface_size
-        self.hextype = str.lower(hex_orientation)
 
+        if hex_orientation.lower() not in ('flat', 'pointy'):
+            raise ValueError('Argument hex_orientation must be one of (flat, pointy).')
+
+        self.hextype = hex_orientation.lower()
         self.cellsize = self.Point(cellsize[0], cellsize[1])
 
         # Calculate cell count from cell size and surface size:
         # colcount = s / (Rc * 1.50)
         # rowcount = s / (math.sqrt(3) / 2) * (Ri * 2)
-        colcount = self.cellsize.x * 1.5
-        rowcount = (math.sqrt(3) / 2) * (self.cellsize.x * 2)
+        colcount = int(self.cellsize.x * 1.5)
+        rowcount = int((math.sqrt(3) / 2) * (self.cellsize.x * 2))
 
         if self.hextype == 'flat':
             self.hex_orientation = self.Orientation(
@@ -47,24 +50,22 @@ class HexMap:
                 0.0                     # start_angle
             )
 
-            self.cellcount = self.Point(int(self.surface_size[0] / colcount),
-                                            int(self.surface_size[1] / rowcount))
+            self.cellcount = self.Point(self.surface_size[0] // colcount, self.surface_size[1] // rowcount)
 
         elif self.hextype == 'pointy':
             self.hex_orientation = self.Orientation(
-                math.sqrt(3.0),
-                math.sqrt(3.0) / 2.0,
-                0.0,
-                3.0 / 2.0,
-                math.sqrt(3.0) / 3.0,
-                -1.0 / 3.0,
-                0.0,
-                2.0 / 3.0,
-                0.5
+                math.sqrt(3.0),         # f0
+                math.sqrt(3.0) / 2.0,   # f1
+                0.0,                    # f2
+                3.0 / 2.0,              # f3
+                math.sqrt(3.0) / 3.0,   # b0
+                -1.0 / 3.0,             # b1
+                0.0,                    # b2
+                2.0 / 3.0,              # b3
+                0.5                     # start_angle
             )
 
-            self.cellcount = self.Point(int(self.surface_size[0] / rowcount),
-                                            int(self.surface_size[1] / colcount))
+            self.cellcount = self.Point(self.surface_size[0] // rowcount, self.surface_size[1] // colcount)
 
         else:
             raise Exception('Value of hex_orientation must be either "flat" or "pointy."')
@@ -213,26 +214,43 @@ class HexMap:
     def populate_board(self):
         board = {}
         # r and q switch for flat or pointy
-        if self.hex_orientation == 'pointy':
+        if self.hextype == 'pointy':
             # TODO: Fix this part, it's still not producing a rectangular map
-            for r in range(self.cellcount.y):
-                r_offset = int(math.floor(r / 2))
-                for q in range(-r_offset, (self.cellcount.x - r_offset) - 1):
+            for r in range(self.cellcount.y ):
+                r_offset = r >> 1  # int(math.floor(r / 2))
+                for q in range(-r_offset, self.cellcount.x - r_offset):
                     # start in 0,0 + radius
-                    board['{0}, {1}'.format(str(q), str(r))] = HexCell(
+                    newcell = HexCell(
                         self.Point(q, r),
-                        self.Layout(self.hex_orientation, self.cellsize,
-                                    self.Point(self.cellsize[0], self.cellsize[1]))
+                        self.Layout(
+                            self.hex_orientation, self.cellsize,
+                                self.Point(self.cellsize[0], self.cellsize[1])
+                            )
                     )
-        else:
+
+                    # test fit
+                    if newcell.pixel_pos.x + self.cellsize[0] > self.surface_size[0] or \
+                        newcell.pixel_pos.y + self.cellsize[1] > self.surface_size[1]:
+                        continue
+                    else:
+                        board[(q, r)] = newcell
+
+        elif self.hextype == 'flat':
             for q in range(self.cellcount.x):
                 q_offset = int(math.floor(q / 2))
                 for r in range(-q_offset, self.cellcount.y - q_offset):
                     # start in 0,0 + radius
-                    board[(q, r)] = HexCell(
+                    newcell = HexCell(
                         self.Point(q, r),
                         self.Layout(self.hex_orientation, self.cellsize,
-                                    self.Point(0 + self.cellsize[0], 0 + self.cellsize[1]))
+                                    self.Point(self.cellsize[0], self.cellsize[1]))
                     )
+
+                    # test fit
+                    if newcell.pixel_pos.x + self.cellsize[0] > self.surface_size[0] or \
+                        newcell.pixel_pos.y + self.cellsize[1] > self.surface_size[1]:
+                        continue
+                    else:
+                        board[(q, r)] = newcell
 
         return board
