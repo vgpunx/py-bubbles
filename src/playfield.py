@@ -22,7 +22,7 @@ class Playfield:
 
         self.colorkey = 'WHITE'
         self.surface = pygame.Surface(surface_size).convert()
-        self.hexmap = HexMap(surface_size, cell_size)
+        self.hexmap = HexMap(surface_size, cell_size, hex_orientation='pointy')
         self.size = int(cell_size[0] - 2) # this is a magic number, we'll get a better radius method in optimization
 
         # sprite groups

@@ -49,7 +49,7 @@ def main():
         pygame.mixer.music.play(loops=-1, start=0.0)
 
     playfield = Playfield(PFLD_SIZE, CELL_SIZE)
-    playfield.load_map(os.path.join(os.curdir, 'maps', 'TEST_MAP0.JSON'))
+    playfield.load_map(os.path.join(os.curdir, 'maps', 'TEST_MAP1.JSON'))
 
     ball_angle = 20
 
@@ -99,7 +99,7 @@ def main():
 
 
 def fire_test(playfield: Playfield, angle):
-    b_start_addr = (7, 9)
+    b_start_addr = (-1, 14)
     b_start = list(playfield.hexmap.board.get(b_start_addr).get_pixelpos())
     b_start[0] = int(b_start[0] + (playfield.get_surface().get_size()[0] / 2) - b_start[0])
 
