@@ -22,6 +22,7 @@ class Playfield:
 
         self.colorkey = 'WHITE'
         self.surface = pygame.Surface(surface_size).convert()
+        self.rect = self.surface.get_rect()
         self.hexmap = HexMap(surface_size, cell_size, hex_orientation='pointy')
         self.size = int(cell_size[0] - 2) # this is a magic number, we'll get a better radius method in optimization
 
@@ -72,6 +73,7 @@ class Playfield:
 
                     # correct rounding errors
                     if mv_cur_address not in spr_neighbors:
+                        # TODO: Validate new address isn't already occupied or enclosed!
                         # make small adjustments to addr until we find the correct one
                         for i in (1, -1):
                             test0 = (mv_cur_address[0] + i, mv_cur_address[1])
@@ -99,12 +101,17 @@ class Playfield:
 
     def load_map(self, filepath):
         try:
-            map_dict = json.load(open(filepath, 'r'))
+            map_toplevel = json.load(open(filepath, 'r'))
+            map_width = map_toplevel['width']
+            map_dict = map_toplevel['map']
 
         except:
             raise SystemExit('Unable to read file located at {0}.'.format(filepath))
 
         try:
+            self.surface = pygame.Surface((map_width, self.surface.get_size()[1])).convert()
+            self.rect = self.surface.get_rect()
+
             for address in map_dict:
                 addr = address.split(", ")
                 addr = (int(addr[0]), int(addr[1]))
