@@ -4,6 +4,7 @@ import json
 import collections
 from pygame.math import Vector2
 from src.bubble import Bubble
+from src.shooter import Shooter
 from src.hexamaplib.hex_map import HexMap
 from pygame.locals import *
 
@@ -33,6 +34,9 @@ class Playfield:
         self.next_bubble = pygame.sprite.GroupSingle()
         self.disloc_bubbles = pygame.sprite.Group()
 
+        # shooter sprite
+        self.shooter = Shooter(self.hexmap.board.get((-1, 14)).pixel_pos, 0, self.all_sprites)
+
         # debug
         # self.dbgsurf = pygame.Surface(surface_size)
         # self.dbgsurf.fill(pygame.Color(self.colorkey))
@@ -45,7 +49,6 @@ class Playfield:
 
         # debug
         # self.surface.blit(self.dbgsurf, (0, 0))
-
         self.all_sprites.update()
 
         if self.active_bubble:
