@@ -60,6 +60,7 @@ class Playfield:
 
         # update and paint everything
         self.all_sprites.draw(self.surface)
+        self.shooter.draw(self.surface)
 
     def process_collision(self):
         mv = self.active_bubble.sprite

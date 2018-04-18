@@ -13,48 +13,51 @@ class Shooter(pygame.sprite.Sprite):
         self.angle = angle
 
         # parts
-        self.__collection__ = pygame.sprite.LayeredUpdates()
+        self.__collection__ = self.__create_internalsprites__(pygame.sprite.LayeredUpdates())
 
 
         # placeholder image
         self.image.set_colorkey(pygame.Color('MAGENTA'))
         self.image.fill(pygame.Color('MAGENTA'))
 
-    def __create_internalsprites__(self):
-        self.__foreground__ = pygame.sprite.Sprite()
-        self.__wheel__ = pygame.sprite.Sprite()
-        self.__background__ = pygame.sprite.Sprite()
+    def __create_internalsprites__(self, spritegroup):
+        foreground = pygame.sprite.Sprite(spritegroup)
+        wheel = pygame.sprite.Sprite(spritegroup)
+        background = pygame.sprite.Sprite(spritegroup)
 
-        self.__foreground__.layer = 2
-        self.__foreground__.image = pygame.Surface((50, 50)).convert()
-        self.__foreground__.rect = self.__foreground__.image.get_rect()
-        self.__foreground__.rect.topleft = [50, 13]
-        self.__foreground__.image.fill(pygame.Color('BLUE'))
+        foreground.layer = 2
+        foreground.image = pygame.Surface((50, 50)).convert()
+        foreground.rect = foreground.image.get_rect()
+        foreground.rect.topleft = [50, 13]
+        foreground.image.fill(pygame.Color('BLUE'))
 
-        self.__wheel__.layer = 1
-        self.__wheel__.image = pygame.Surface((72, 72)).convert()
-        self.__wheel__.rect = self.__wheel__.image.get_rect()
-        self.__wheel__.rect.center = [self.__foreground__.topright[0] - 10, self.__foreground__.topright[1] - 10]
+        wheel.layer = 1
+        wheel.image = pygame.Surface((72, 72)).convert()
+        wheel.rect = wheel.image.get_rect()
+        wheel.rect.center = [foreground.rect.topright[0] - 10,
+                                      foreground.rect.topright[1] - 10]
         pygame.draw.circle(
-            self.__wheel__.image,
+            wheel.image,
             pygame.Color('RED'),
             (36, 36),
             60,
             3
         )
         pygame.draw.line(
-            self.__wheel__.image,
+            wheel.image,
             pygame.Color('BLACK'),
             (36, 36),
             (0, 36),
             3
         )
 
-        self.__background__.layer = 0
-        self.__background__.image = pygame.Surface((45, 30)).convert()
-        self.__background__.rect = self.__background__.image.get_rect()
-        self.__background__.image.fill(pygame.Color('GREEN'))
-        pygame.transform.rotate(self.__background__.image, 22)
+        background.layer = 0
+        background.image = pygame.Surface((45, 30)).convert()
+        background.rect = background.image.get_rect()
+        background.image.fill(pygame.Color('GREEN'))
+        pygame.transform.rotate(background.image, 22)
+
+        return spritegroup
 
     def update(self, *args):
         super().update(*args)
@@ -62,3 +65,5 @@ class Shooter(pygame.sprite.Sprite):
     def kill(self):
         super().kill()
 
+    def draw(self, surface):
+        return self.__collection__.draw(surface)
