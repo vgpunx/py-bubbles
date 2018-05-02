@@ -36,6 +36,8 @@ class Playfield:
 
         # shooter sprite
         self.shooter = Shooter(self.hexmap.board.get((-1, 14)).pixel_pos, 0, self.all_sprites)
+        # debug
+        print(self.shooter)
 
         # debug
         # self.dbgsurf = pygame.Surface(surface_size)
