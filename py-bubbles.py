@@ -35,7 +35,7 @@ def main():
 
     playfield = Playfield(PFLD_SIZE, CELL_SIZE)
     playfield.load_map(os.path.join(os.curdir, 'maps', 'TEST_MAP1.JSON'))
-    playfield.rect.center = screen.get_rect().center
+    # playfield.rect.center = screen.get_rect().center
 
     ball_angle = 20
 
@@ -47,7 +47,7 @@ def main():
 
         # update the playfield and blit it
         playfield.update()
-        screen.blit(playfield.image, playfield.rect.topleft)
+        screen.blit(playfield.image, (PFLD_SIZE[0] / 2, (DISP_SIZE[1] - PFLD_SIZE[1]) / 2))
 
         # this is the event handler, which we should move to src.Control
         # this is where any graphical updates are blitted to the display
@@ -89,7 +89,6 @@ def fire_test(playfield: Playfield, angle):
         fire = Bubble(
             b_start_addr,                                       # address
             b_start,                                            # pixelpos
-            playfield.get_surface().get_rect(),                 # bounds
             int(playfield.hexmap.cellsize[0] - 2),              # radius
             'RED',                                              # fill_color
             'BLACK',                                            # stroke_color

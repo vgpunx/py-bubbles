@@ -65,29 +65,30 @@ class Playfield:
 
     def process_collision(self):
         mv = self.active_bubble.sprite
-        mv.rect.clamp_ip(self.rect)
 
         # check for boundary collision and bounce
         if mv.rect.top < 0:
             mv.bounce(Vector2(self.rect.topright))
-            print("top collision")
             return
-        elif mv.rect.left < 0 or mv.rect.right > self.area_params[1]:
-            mv.bounce(Vector2(self.rect.bottomright))
-            print("side collision")
+        elif mv.rect.left < 0 or mv.rect.right > self.rect.right:
+            mv.bounce(Vector2(self.rect.bottomleft))
             return
 
         collision_list = pygame.sprite.spritecollide(mv, self.bubble_map, False)
 
         if collision_list:
             # keep going until circle collision
-            print("sprite collision")
             for spr in collision_list:
                 if pygame.sprite.collide_circle(mv, spr):
                     # the idea here is to slow down, find the direction to the nearest sprite,
                     # and move the sprite until it touches at least two others
                     spr_neighbors = self.hexmap.hex_allneighbors(spr.grid_address)
                     mv_cur_address = self.hexmap.get_celladdressbypixel(mv.rect.center)
+
+                    # if mv_cur_address in spr_neighbors \
+                    #     and not self.__test_occupied__(mv_cur_address) \
+                    #     and not self.__test_surrounded__(mv_cur_address):
+                    #     break
 
                     # correct rounding errors
                     if mv_cur_address not in spr_neighbors:
@@ -96,10 +97,15 @@ class Playfield:
                         for i in (1, -1):
                             test0 = (mv_cur_address[0] + i, mv_cur_address[1])
                             test1 = (mv_cur_address[0], mv_cur_address[1] + i)
-                            if test0 in spr_neighbors:
+
+                            if self.__test_shared_rings__(test0, spr.grid_address) \
+                                    and not self.__test_occupied__(test0) \
+                                    and not self.__test_surrounded__(test0):
                                 mv_cur_address = test0
                                 break
-                            elif test1 in spr_neighbors:
+                            elif self.__test_shared_rings__(test1, spr.grid_address) \
+                                    and not self.__test_occupied__(test1) \
+                                    and not self.__test_surrounded__(test1):
                                 mv_cur_address = test1
                                 break
 
@@ -113,6 +119,52 @@ class Playfield:
                     self.active_bubble.remove(mv)
 
                 continue
+
+    def __test_shared_rings__(self, celladdr_1, celladdr_2):
+        """
+        Validates two cells share neighborhood rings.
+        :param celladdr_1: Tuple
+        :param celladdr_2: Tuple
+        :return: boolean
+        """
+        cell_1_neighbors = self.hexmap.hex_allneighbors(celladdr_1)
+        cell_2_neighbors = self.hexmap.hex_allneighbors(celladdr_2)
+
+        if celladdr_1 in cell_2_neighbors and celladdr_2 in cell_1_neighbors:
+            return True
+
+
+        return False
+
+
+    def __test_occupied__(self, celladdr):
+        """
+        Validates a cell is occupied by a Bubble.
+        :param celladdr: Tuple
+        :return: boolean
+        """
+
+        return isinstance(self.hexmap.board.get(celladdr), Bubble)
+
+
+    def __test_surrounded__(self, celladdr):
+        """
+        Validates a cell is surrounded by Bubbles.
+        :param celladdr: Tuple
+        :return: boolean
+        """
+
+        ring = self.hexmap.hex_allneighbors(celladdr)
+        counter = 0
+
+        for celladdr in ring:
+            if isinstance(self.hexmap.board.get(celladdr), Bubble):
+                counter += 1
+
+        if counter == 5:
+            return True
+
+        return False
 
 
     def get_surface(self):
@@ -141,7 +193,6 @@ class Playfield:
                     Bubble(
                         addr,                                        # adress
                         self.hexmap.board.get(addr).get_pixelpos(),  # pixelpos
-                        self.image.get_rect(),                     # bounds
                         self.cell_size,                                   # radius
                         map_dict.get(address),                       # fill_color
                         'BLACK',                                     # stroke_color

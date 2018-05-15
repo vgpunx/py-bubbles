@@ -4,7 +4,7 @@ from pygame.math import Vector2
 
 class Bubble(pygame.sprite.Sprite):
 
-    def __init__(self, address, pos, bounds, radius, fill_color, stroke_color, angle=90, velocity=0, *groups):
+    def __init__(self, address, pos, radius, fill_color, stroke_color, angle=90, velocity=0, *groups):
         pygame.sprite.Sprite.__init__(self, *groups)
         self.image = pygame.Surface((radius * 2, radius * 2))
         self.image.set_colorkey(pygame.Color('MAGENTA'))
@@ -15,7 +15,7 @@ class Bubble(pygame.sprite.Sprite):
         self.pos = Vector2(pos)
         self.angle = angle
         self.velocity = Vector2(1, 0).rotate(-self.angle) * velocity
-        self.bounds = bounds
+        # self.bounds = bounds
 
         # for drawing placeholder images
         # this will be replaced with actual image code later
@@ -62,8 +62,7 @@ class Bubble(pygame.sprite.Sprite):
         """
 
         self.velocity = self.velocity.reflect(collision_vector.rotate(90).normalize())
-        self.move(self.velocity)
-        print("BOING! {0}".format(self.rect.center))
+        # self.move(self.velocity)
 
 
     # overload placeholders
