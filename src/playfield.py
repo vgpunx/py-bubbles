@@ -22,10 +22,12 @@ class Playfield:
         """
 
         self.colorkey = 'WHITE'
-        self.surface = pygame.Surface(surface_size).convert()
-        self.rect = self.surface.get_rect()
+        self.image = pygame.Surface(surface_size).convert()
+        self.rect = self.image.get_rect()
+        self.area_params = surface_size
+
         self.hexmap = HexMap(surface_size, cell_size, hex_orientation='pointy')
-        self.size = int(cell_size[0] - 2) # this is a magic number, we'll get a better radius method in optimization
+        self.cell_size = int(cell_size[0] - 2) # this is a magic number, we'll get a better radius method in optimization
 
         # sprite groups
         self.all_sprites = pygame.sprite.Group()
@@ -37,7 +39,7 @@ class Playfield:
         # shooter sprite
         self.shooter = Shooter(self.hexmap.board.get((-1, 14)).pixel_pos, 0, self.all_sprites)
         # debug
-        print(self.shooter)
+        # print(self.shooter)
 
         # debug
         # self.dbgsurf = pygame.Surface(surface_size)
@@ -47,29 +49,39 @@ class Playfield:
         #     cell.paint(self.dbgsurf, color="grey")
 
     def update(self):
-        self.surface.fill(pygame.Color(self.colorkey))
+        self.image.fill(pygame.Color(self.colorkey))
 
         # debug
         # self.surface.blit(self.dbgsurf, (0, 0))
         self.all_sprites.update()
 
         if self.active_bubble:
-            try:
-                self.process_collision()
-
-            except:
-                raise
+            self.process_collision()
 
         # update and paint everything
-        self.all_sprites.draw(self.surface)
-        self.shooter.draw(self.surface)
+        self.all_sprites.draw(self.image)
+        self.shooter.draw(self.image)
+
 
     def process_collision(self):
         mv = self.active_bubble.sprite
+        mv.rect.clamp_ip(self.rect)
+
+        # check for boundary collision and bounce
+        if mv.rect.top < 0:
+            mv.bounce(Vector2(self.rect.topright))
+            print("top collision")
+            return
+        elif mv.rect.left < 0 or mv.rect.right > self.area_params[1]:
+            mv.bounce(Vector2(self.rect.bottomright))
+            print("side collision")
+            return
+
         collision_list = pygame.sprite.spritecollide(mv, self.bubble_map, False)
 
         if collision_list:
             # keep going until circle collision
+            print("sprite collision")
             for spr in collision_list:
                 if pygame.sprite.collide_circle(mv, spr):
                     # the idea here is to slow down, find the direction to the nearest sprite,
@@ -102,8 +114,9 @@ class Playfield:
 
                 continue
 
+
     def get_surface(self):
-        return self.surface
+        return self.image
 
     def load_map(self, filepath):
         try:
@@ -115,8 +128,8 @@ class Playfield:
             raise SystemExit('Unable to read file located at {0}.'.format(filepath))
 
         try:
-            self.surface = pygame.Surface((map_width, self.surface.get_size()[1])).convert()
-            self.rect = self.surface.get_rect()
+            self.image = pygame.Surface((map_width, self.image.get_size()[1])).convert()
+            self.rect = self.image.get_rect()
 
             for address in map_dict:
                 addr = address.split(", ")
@@ -128,8 +141,8 @@ class Playfield:
                     Bubble(
                         addr,                                        # adress
                         self.hexmap.board.get(addr).get_pixelpos(),  # pixelpos
-                        self.surface.get_rect(),                     # bounds
-                        self.size,                                   # radius
+                        self.image.get_rect(),                     # bounds
+                        self.cell_size,                                   # radius
                         map_dict.get(address),                       # fill_color
                         'BLACK',                                     # stroke_color
                         180,                                         # angle

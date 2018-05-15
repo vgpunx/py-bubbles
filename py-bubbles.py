@@ -47,7 +47,7 @@ def main():
 
         # update the playfield and blit it
         playfield.update()
-        screen.blit(playfield.surface, playfield.rect.topleft)
+        screen.blit(playfield.image, playfield.rect.topleft)
 
         # this is the event handler, which we should move to src.Control
         # this is where any graphical updates are blitted to the display

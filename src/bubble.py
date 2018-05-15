@@ -39,7 +39,7 @@ class Bubble(pygame.sprite.Sprite):
     def update(self, *args):
         super().update(*args)
         self.move(self.velocity)
-        self.bounce()
+        # self.bounce()
 
     def draw(self):
         # placeholder code
@@ -54,22 +54,17 @@ class Bubble(pygame.sprite.Sprite):
         self.pos += direction
         self.rect.center = self.pos
 
-    def bounce(self):
-        bounce = False
+    def bounce(self, collision_vector):
+        """
+        Updates internal velocity vector with one that is reflected off of the given collision vector.
+        :param collision_vector: pygame.math.Vector2
+        :return: None
+        """
 
-        if self.rect.top <= self.bounds.top:
-            norm = Vector2(0, 1)
-            bounce = True
+        self.velocity = self.velocity.reflect(collision_vector.rotate(90).normalize())
+        self.move(self.velocity)
+        print("BOING! {0}".format(self.rect.center))
 
-        elif self.rect.left <= self.bounds.left or self.rect.right >= self.bounds.right:
-            norm = Vector2(1, 0)
-            bounce = True
-
-        if bounce:
-            self.velocity = self.velocity.reflect(norm)
-            self.move(self.velocity)
-
-            # yes, i'm happy with this solution
 
     # overload placeholders
     def add(self, *groups):
