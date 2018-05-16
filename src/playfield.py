@@ -42,17 +42,17 @@ class Playfield:
         # print(self.shooter)
 
         # debug
-        # self.dbgsurf = pygame.Surface(surface_size)
-        # self.dbgsurf.fill(pygame.Color(self.colorkey))
-        # self.dbgsurf.convert()
-        # for cell in self.hexmap.board.values():
-        #     cell.paint(self.dbgsurf, color="grey")
+        self.dbgsurf = pygame.Surface(surface_size)
+        self.dbgsurf.fill(pygame.Color(self.colorkey))
+        self.dbgsurf.convert()
+        for cell in self.hexmap.board.values():
+            cell.paint(self.dbgsurf, color="grey")
 
     def update(self):
         self.image.fill(pygame.Color(self.colorkey))
 
         # debug
-        # self.surface.blit(self.dbgsurf, (0, 0))
+        self.image.blit(self.dbgsurf, (0, 0))
         self.all_sprites.update()
 
         if self.active_bubble:
@@ -68,10 +68,10 @@ class Playfield:
 
         # check for boundary collision and bounce
         if mv.rect.top < 0:
-            mv.bounce(Vector2(self.rect.topright))
+            mv.bounce(Vector2(1, 0))
             return
-        elif mv.rect.left < 0 or mv.rect.right > self.rect.right:
-            mv.bounce(Vector2(self.rect.bottomleft))
+        elif mv.rect.left < 0 or mv.rect.right > self.rect.width:
+            mv.bounce(Vector2(0, 1))
             return
 
         collision_list = pygame.sprite.spritecollide(mv, self.bubble_map, False)

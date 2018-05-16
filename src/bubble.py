@@ -62,7 +62,6 @@ class Bubble(pygame.sprite.Sprite):
         """
 
         self.velocity = self.velocity.reflect(collision_vector.rotate(90).normalize())
-        # self.move(self.velocity)
 
 
     # overload placeholders

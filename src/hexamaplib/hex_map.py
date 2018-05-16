@@ -231,10 +231,16 @@ class HexMap:
                     )
 
                     # test fit
-                    if newcell.pixel_pos.x + self.cellsize[0] > self.surface_size[0] or \
-                        newcell.pixel_pos.y + self.cellsize[1] > self.surface_size[1]:
+                    if newcell.pixel_pos.x + (self.cellsize[0] // 2) >= self.surface_size[0] or \
+                        newcell.pixel_pos.y + self.cellsize[1] >= self.surface_size[1]:
+                        # debug
+                        print("discarding cell {0} because {1} exceeds surface area {2}.".format(newcell.axialpos,
+                                                                                                 newcell.pixel_pos,
+                                                                                                 self.surface_size))
                         continue
                     else:
+                        #debug
+                        print("adding cell {0} at {1}.".format(newcell.axialpos, newcell.pixel_pos))
                         board[(q, r)] = newcell
 
         elif self.hextype == 'flat':
