@@ -11,7 +11,7 @@ from pygame.locals import *
 
 class Playfield:
 
-    def __init__(self, surface_size, cell_size):
+    def __init__(self, surface_size, cell_size, debug=False):
         """
         Renders a background and gameboard surface.
 
@@ -21,13 +21,16 @@ class Playfield:
         :type cell_size: Tuple(int, int)
         """
 
+        self.debug = debug
+
         self.colorkey = 'WHITE'
         self.image = pygame.Surface(surface_size).convert()
         self.rect = self.image.get_rect()
         self.area_params = surface_size
 
         self.hexmap = HexMap(surface_size, cell_size, hex_orientation='pointy')
-        self.cell_size = int(cell_size[0] - 2) # this is a magic number, we'll get a better radius method in optimization
+        self.cell_size = cell_size
+        self.cell_radius = int(cell_size[0] - 2) # this is a magic number, we'll get a better radius method in optimization
 
         # sprite groups
         self.all_sprites = pygame.sprite.Group()
@@ -42,17 +45,20 @@ class Playfield:
         # print(self.shooter)
 
         # debug
-        self.dbgsurf = pygame.Surface(surface_size)
-        self.dbgsurf.fill(pygame.Color(self.colorkey))
-        self.dbgsurf.convert()
-        for cell in self.hexmap.board.values():
-            cell.paint(self.dbgsurf, color="grey")
+        if self.debug:
+            self.dbgsurf = pygame.Surface(surface_size)
+            self.dbgsurf.fill(pygame.Color(self.colorkey))
+            self.dbgsurf.convert()
+            for cell in self.hexmap.board.values():
+                cell.paint(self.dbgsurf, color="grey")
 
     def update(self):
         self.image.fill(pygame.Color(self.colorkey))
 
         # debug
-        self.image.blit(self.dbgsurf, (0, 0))
+        if self.debug:
+            self.image.blit(self.dbgsurf, (0, 0))
+
         self.all_sprites.update()
 
         if self.active_bubble:
@@ -180,8 +186,22 @@ class Playfield:
             raise SystemExit('Unable to read file located at {0}.'.format(filepath))
 
         try:
+            # reset affected properties
+            #debug
+            print("Creating new map...")
+
             self.image = pygame.Surface((map_width, self.image.get_size()[1])).convert()
+            self.area_params = self.image.get_size()
             self.rect = self.image.get_rect()
+            self.hexmap = HexMap(self.area_params, self.cell_size, hex_orientation='pointy')
+
+            # debug
+            if self.debug:
+                self.dbgsurf = pygame.Surface(self.area_params)
+                self.dbgsurf.fill(pygame.Color(self.colorkey))
+                self.dbgsurf.convert()
+                for cell in self.hexmap.board.values():
+                    cell.paint(self.dbgsurf, color="grey")
 
             for address in map_dict:
                 addr = address.split(", ")
@@ -193,7 +213,7 @@ class Playfield:
                     Bubble(
                         addr,                                        # adress
                         self.hexmap.board.get(addr).get_pixelpos(),  # pixelpos
-                        self.cell_size,                                   # radius
+                        self.cell_radius,                            # radius
                         map_dict.get(address),                       # fill_color
                         'BLACK',                                     # stroke_color
                         180,                                         # angle

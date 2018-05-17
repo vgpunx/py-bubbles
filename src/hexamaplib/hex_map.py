@@ -231,19 +231,20 @@ class HexMap:
                     )
 
                     # test fit
-                    if newcell.pixel_pos.x + (self.cellsize[0] // 2) >= self.surface_size[0] or \
-                        newcell.pixel_pos.y + self.cellsize[1] >= self.surface_size[1]:
+                    # TODO: export this to a function and apply to both layout options
+                    if newcell.pixel_pos.x + (self.cellsize[0] * 0.75) > self.surface_size[0] or \
+                        newcell.pixel_pos.y + self.cellsize[1] > self.surface_size[1]:
                         # debug
-                        print("discarding cell {0} because point {1} exceeds surface area {2}.".format(newcell.axialpos,
-                                                                                                 (newcell.pixel_pos.x + self.cellsize[0],
-                                                                                                  newcell.pixel_pos.y + self.cellsize[1]),
-                                                                                                 self.surface_size))
+                        # print("discarding cell {0} because point {1} exceeds surface area {2}.".format(newcell.axialpos,
+                        #                                                                          (newcell.pixel_pos.x + self.cellsize[0],
+                        #                                                                           newcell.pixel_pos.y + self.cellsize[1]),
+                        #                                                                          self.surface_size))
                         continue
                     else:
                         #debug
-                        print("adding cell {0} at {1}.".format(newcell.axialpos,
-                                                               (newcell.pixel_pos.x + self.cellsize[0],
-                                                                newcell.pixel_pos.y + self.cellsize[1])))
+                        # print("adding cell {0} at {1}.".format(newcell.axialpos,
+                        #                                        (newcell.pixel_pos.x + self.cellsize[0],
+                        #                                         newcell.pixel_pos.y + self.cellsize[1])))
                         board[(q, r)] = newcell
 
         elif self.hextype == 'flat':
