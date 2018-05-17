@@ -6,12 +6,13 @@ from pygame.math import Vector2
 from src.bubble import Bubble
 from src.shooter import Shooter
 from src.hexamaplib.hex_map import HexMap
+from src.constants import *
 from pygame.locals import *
 
 
 class Playfield:
 
-    def __init__(self, surface_size, cell_size, debug=False):
+    def __init__(self, map_file_path, cell_size):
         """
         Renders a background and gameboard surface.
 
@@ -21,14 +22,13 @@ class Playfield:
         :type cell_size: Tuple(int, int)
         """
 
-        self.debug = debug
-
         self.colorkey = 'WHITE'
-        self.image = pygame.Surface(surface_size).convert()
-        self.rect = self.image.get_rect()
-        self.area_params = surface_size
+        # self.image = pygame.Surface(surface_size).convert()
+        # self.rect = self.image.get_rect()
+        # self.area_params = DISP_SIZE[1] * 0.98
+        #
+        # self.hexmap = HexMap(surface_size, cell_size, hex_orientation='pointy')
 
-        self.hexmap = HexMap(surface_size, cell_size, hex_orientation='pointy')
         self.cell_size = cell_size
         self.cell_radius = int(cell_size[0] - 2) # this is a magic number, we'll get a better radius method in optimization
 
@@ -39,24 +39,13 @@ class Playfield:
         self.next_bubble = pygame.sprite.GroupSingle()
         self.disloc_bubbles = pygame.sprite.Group()
 
-        # shooter sprite
-        self.shooter = Shooter(self.hexmap.board.get((-1, 14)).pixel_pos, 0, self.all_sprites)
-        # debug
-        # print(self.shooter)
-
-        # debug
-        if self.debug:
-            self.dbgsurf = pygame.Surface(surface_size)
-            self.dbgsurf.fill(pygame.Color(self.colorkey))
-            self.dbgsurf.convert()
-            for cell in self.hexmap.board.values():
-                cell.paint(self.dbgsurf, color="grey")
+        self.load_map(map_file_path)
 
     def update(self):
         self.image.fill(pygame.Color(self.colorkey))
 
         # debug
-        if self.debug:
+        if DEBUG:
             self.image.blit(self.dbgsurf, (0, 0))
 
         self.all_sprites.update()
@@ -180,6 +169,7 @@ class Playfield:
         try:
             map_toplevel = json.load(open(filepath, 'r'))
             map_width = map_toplevel['width']
+            map_height = map_toplevel['height']
             map_dict = map_toplevel['map']
 
         except:
@@ -188,15 +178,22 @@ class Playfield:
         try:
             # reset affected properties
             #debug
-            print("Creating new map...")
+            if DEBUG:
+                print("Loading map...")
 
-            self.image = pygame.Surface((map_width, self.image.get_size()[1])).convert()
+            self.image = pygame.Surface((map_width, map_height)).convert()
             self.area_params = self.image.get_size()
             self.rect = self.image.get_rect()
             self.hexmap = HexMap(self.area_params, self.cell_size, hex_orientation='pointy')
 
+            # shooter sprite
+            shooter_pos = self.rect.midbottom
+            self.shooter = Shooter(shooter_pos, 0, self.all_sprites)
+
             # debug
-            if self.debug:
+            if DEBUG:
+                print("Playfield dimensions: {0}".format(self.area_params))
+                print(self.shooter)
                 self.dbgsurf = pygame.Surface(self.area_params)
                 self.dbgsurf.fill(pygame.Color(self.colorkey))
                 self.dbgsurf.convert()

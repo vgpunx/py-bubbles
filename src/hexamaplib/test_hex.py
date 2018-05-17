@@ -22,7 +22,7 @@ def main():
     clock = pygame.time.Clock()
 
     # now the hex stuff
-    hexsize = (20, 20)
+    hexsize = (30, 30)
     cell_or = 'pointy'
 
     hexmap = hex_map.HexMap(screensize, hexsize, hex_orientation=cell_or)

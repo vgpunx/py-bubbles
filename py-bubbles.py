@@ -33,8 +33,8 @@ def main():
         pygame.mixer.music.set_volume(BGM_VOLUME)
         pygame.mixer.music.play(loops=-1, start=0.0)
 
-    playfield = Playfield(PFLD_SIZE, CELL_SIZE)
-    playfield.load_map(os.path.join(os.curdir, 'maps', 'TEST_MAP1.JSON'))
+    playfield = Playfield(os.path.join(os.curdir, 'maps', 'TEST_MAP1.JSON'), CELL_SIZE)
+    # playfield.load_map(os.path.join(os.curdir, 'maps', 'TEST_MAP1.JSON'))
     playfield.rect.center = screen.get_rect().center
 
     ball_angle = 20
