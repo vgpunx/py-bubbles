@@ -34,8 +34,11 @@ def main():
         pygame.mixer.music.play(loops=-1, start=0.0)
 
     playfield = Playfield(os.path.join(os.curdir, 'maps', 'TEST_MAP1.JSON'), CELL_SIZE)
-    # playfield.load_map(os.path.join(os.curdir, 'maps', 'TEST_MAP1.JSON'))
-    playfield.rect.center = screen.get_rect().center
+    playfield_pos = (
+        DISP_SIZE[0] / 2 - (playfield.rect.width / 2),
+        DISP_SIZE[1] / 2 - playfield.rect.height / 2
+    )
+    # playfield.rect.center = screen.get_rect().center
 
     ball_angle = 20
 
@@ -47,7 +50,7 @@ def main():
 
         # update the playfield and blit it
         playfield.update()
-        screen.blit(playfield.image, playfield.rect.topleft)
+        screen.blit(playfield.image, playfield_pos)
 
         # this is the event handler, which we should move to src.Control
         # this is where any graphical updates are blitted to the display
@@ -63,6 +66,17 @@ def main():
                         ball_angle += 5
                     else:
                         ball_angle = 20
+
+                    break
+
+                elif event.key == pygame.K_a:
+                    pygame.transform.rotate(playfield.shooter.image, 2)
+                    break
+
+                elif event.key == pygame.K_d:
+                    pygame.transform.rotate(playfield.shooter.image, -2)
+                    break
+
 
         # update the display to show changes
         # in production, we will use "dirty rect" updating to improve performance
@@ -81,14 +95,14 @@ def main():
 
 
 def fire_test(playfield: Playfield, angle):
-    b_start_addr = (-1, 14)
-    b_start = list(playfield.hexmap.board.get(b_start_addr).get_pixelpos())
-    b_start[0] = int(b_start[0] + (playfield.get_surface().get_size()[0] / 2) - b_start[0])
+    b_origin_pos = playfield.shooter.rect.center
+    b_origin_cell = playfield.hexmap.get_celladdressbypixel(b_origin_pos)
+    # b_origin_pos[0] = int(b_origin_pos[0] + (playfield.get_surface().get_size()[0] / 2) - b_origin_pos[0])
 
     if len(playfield.active_bubble) == 0:
         fire = Bubble(
-            b_start_addr,                                       # address
-            b_start,                                            # pixelpos
+            b_origin_cell,                                       # address
+            b_origin_pos,                                            # pixelpos
             int(playfield.hexmap.cellsize[0] - 2),              # radius
             'RED',                                              # fill_color
             'BLACK',                                            # stroke_color

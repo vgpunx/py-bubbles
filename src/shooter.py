@@ -5,7 +5,6 @@ from src.constants import *
 
 
 class Shooter(pygame.sprite.Sprite):
-    image = ...  # type: pygame.Surface
 
     def __init__(self, position, angle, *groups):
         super().__init__(*groups)
@@ -77,12 +76,15 @@ class Shooter(pygame.sprite.Sprite):
     def update(self, *args):
         super().update(*args)
         # eng = self.__collection__.get_sprites_from_layer(0)[0]
-        # if self.__flag_frame__ % 2 == 0:
-        #     eng.rect.center = (eng.rect.center[0] - 5, eng.rect.center[1])
-        #     self.__flag_frame__ = 1
-        # else:
-        #     eng.rect.center = (eng.rect.center[0] + 5, eng.rect.center[1])
-        #     self.__flag_frame__ = 0
+
+        # if pygame.time.get_ticks() / 10 == 6:
+        #     if self.__flag_frame__ == 0:
+        #         eng.rect.center = (eng.rect.center[0], eng.rect.center[1] - 20)
+        #         self.__flag_frame__ = 1
+        #     else:
+        #         eng.rect.center = (eng.rect.center[0], eng.rect.center[1] + 20)
+        #         self.__flag_frame__ = 0
+
 
         self.__collection__.update()
 

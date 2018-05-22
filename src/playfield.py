@@ -23,21 +23,17 @@ class Playfield:
         """
 
         self.colorkey = 'WHITE'
-        # self.image = pygame.Surface(surface_size).convert()
-        # self.rect = self.image.get_rect()
-        # self.area_params = DISP_SIZE[1] * 0.98
-        #
-        # self.hexmap = HexMap(surface_size, cell_size, hex_orientation='pointy')
 
         self.cell_size = cell_size
         self.cell_radius = int(cell_size[0] - 2) # this is a magic number, we'll get a better radius method in optimization
 
         # sprite groups
         self.all_sprites = pygame.sprite.Group()
-        self.bubble_map = pygame.sprite.Group()
+        self.bubble_map = pygame.sprite.Group()  # i think i need a new class here
         self.active_bubble = pygame.sprite.GroupSingle()
         self.next_bubble = pygame.sprite.GroupSingle()
         self.disloc_bubbles = pygame.sprite.Group()
+
 
         self.load_map(map_file_path)
 
@@ -149,15 +145,22 @@ class Playfield:
         :return: boolean
         """
 
-        ring = self.hexmap.hex_allneighbors(celladdr)
         counter = 0
 
-        for celladdr in ring:
+        for celladdr in self.hexmap.hex_allneighbors(celladdr):
             if isinstance(self.hexmap.board.get(celladdr), Bubble):
                 counter += 1
 
         if counter == 5:
             return True
+
+        return False
+
+
+    def __test_blocked__(self, cur_celladdr, dest_celladdr):
+        for celladdr in self.hexmap.hex_linedraw(cur_celladdr, dest_celladdr):
+            if isinstance(self.hexmap.board.get(celladdr), Bubble):
+                return True
 
         return False
 
@@ -187,8 +190,9 @@ class Playfield:
             self.hexmap = HexMap(self.area_params, self.cell_size, hex_orientation='pointy')
 
             # shooter sprite
-            shooter_pos = self.rect.midbottom
-            self.shooter = Shooter(shooter_pos, 0, self.all_sprites)
+            # shooter_pos = self.rect.midbottom
+            self.shooter = Shooter((0,0), 0, self.all_sprites)
+            self.shooter.rect.midbottom = (self.rect.midbottom[0] + 10, self.rect.midbottom[1] - 20)
 
             # debug
             if DEBUG:
@@ -220,5 +224,6 @@ class Playfield:
                 )
 
             self.all_sprites.add(self.bubble_map)
+
         except:
             raise
