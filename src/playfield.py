@@ -5,6 +5,7 @@ import collections
 from pygame.math import Vector2
 from src.bubble import Bubble
 from src.shooter import Shooter
+from src.bubblemap import BubbleMap
 from src.hexamaplib.hex_map import HexMap
 from src.constants import *
 from pygame.locals import *
@@ -29,7 +30,7 @@ class Playfield:
 
         # sprite groups
         self.all_sprites = pygame.sprite.Group()
-        self.bubble_map = pygame.sprite.Group()  # i think i need a new class here
+        self.bubble_map = BubbleMap()  # i think i need a new class here
         self.active_bubble = pygame.sprite.GroupSingle()
         self.next_bubble = pygame.sprite.GroupSingle()
         self.disloc_bubbles = pygame.sprite.Group()
@@ -73,32 +74,63 @@ class Playfield:
                 if pygame.sprite.collide_circle(mv, spr):
                     # the idea here is to slow down, find the direction to the nearest sprite,
                     # and move the sprite until it touches at least two others
+                    mv.set_position(mv.rect.clamp(self.rect).center)
                     spr_neighbors = self.hexmap.hex_allneighbors(spr.grid_address)
                     mv_cur_address = self.hexmap.get_celladdressbypixel(mv.rect.center)
 
-                    # if mv_cur_address in spr_neighbors \
-                    #     and not self.__test_occupied__(mv_cur_address) \
-                    #     and not self.__test_surrounded__(mv_cur_address):
-                    #     break
+                    if DEBUG:
+                        print("I think I'm in cell {0}.".format(mv_cur_address))
+
+                    if mv_cur_address in spr_neighbors \
+                        and not self.__test_occupied__(mv_cur_address):
+                        if DEBUG:
+                            print("\tThis seems good, let's stay here.")
+
+                        break
 
                     # correct rounding errors
-                    if mv_cur_address not in spr_neighbors:
+                    elif mv_cur_address not in self.hexmap.board.keys() or mv_cur_address not in spr_neighbors:
                         # TODO: Validate new address isn't already occupied or enclosed!
                         # make small adjustments to addr until we find the correct one
+
+                        if DEBUG:
+                            print("Correcting for rounding errors...")
+
                         for i in (1, -1):
                             test0 = (mv_cur_address[0] + i, mv_cur_address[1])
                             test1 = (mv_cur_address[0], mv_cur_address[1] + i)
 
-                            if self.__test_shared_rings__(test0, spr.grid_address) \
-                                    and not self.__test_occupied__(test0) \
-                                    and not self.__test_surrounded__(test0):
-                                mv_cur_address = test0
-                                break
-                            elif self.__test_shared_rings__(test1, spr.grid_address) \
-                                    and not self.__test_occupied__(test1) \
-                                    and not self.__test_surrounded__(test1):
-                                mv_cur_address = test1
-                                break
+                            if DEBUG:
+                                print("\tChecking address {0}".format(test0))
+
+                            if not self.__test_occupied__(test0) \
+                                    and test0 in spr_neighbors \
+                                    and test0 in self.hexmap.board.keys():
+                                    mv_cur_address = test0
+
+                                    if DEBUG:
+                                        print("\tAddress {0} seems to be good, let's go with that".format(test0))
+
+                                    break
+
+                            if DEBUG:
+                                print("\tChecking address {0}".format(test1))
+
+                            elif not self.__test_occupied__(test1) \
+                                    and test1 in spr_neighbors \
+                                    and test1 in self.hexmap.board.keys():
+                                    mv_cur_address = test1
+
+                                    if DEBUG:
+                                        print("\tAddress {0} seems to be good, let's go with that".format(test1))
+
+                                    break
+
+                            else:
+                                continue
+
+                    if DEBUG:
+                        print("My new address is {0}".format(mv_cur_address))
 
                     mv.grid_address = mv_cur_address
                     dest_cell = self.hexmap.board.get(mv.grid_address)
@@ -108,6 +140,8 @@ class Playfield:
                     # move the active bubble to the map
                     self.bubble_map.add(mv)
                     self.active_bubble.remove(mv)
+
+                    return
 
                 continue
 
@@ -135,7 +169,7 @@ class Playfield:
         :return: boolean
         """
 
-        return isinstance(self.hexmap.board.get(celladdr), Bubble)
+        return isinstance(self.bubble_map.get(celladdr), Bubble)
 
 
     def __test_surrounded__(self, celladdr):
@@ -148,7 +182,7 @@ class Playfield:
         counter = 0
 
         for celladdr in self.hexmap.hex_allneighbors(celladdr):
-            if isinstance(self.hexmap.board.get(celladdr), Bubble):
+            if isinstance(self.bubble_map.get(celladdr), Bubble):
                 counter += 1
 
         if counter == 5:
@@ -158,8 +192,11 @@ class Playfield:
 
 
     def __test_blocked__(self, cur_celladdr, dest_celladdr):
-        for celladdr in self.hexmap.hex_linedraw(cur_celladdr, dest_celladdr):
-            if isinstance(self.hexmap.board.get(celladdr), Bubble):
+        a = self.hexmap.CubeCoord(cur_celladdr[0], cur_celladdr[1], -cur_celladdr[0] - cur_celladdr[1])
+        b = self.hexmap.CubeCoord(dest_celladdr[0], dest_celladdr[1], -dest_celladdr[0] - dest_celladdr[1])
+
+        for celladdr in self.hexmap.hex_linedraw(a, b):
+            if isinstance(self.bubble_map.get((celladdr.q, celladdr.r)), Bubble):
                 return True
 
         return False

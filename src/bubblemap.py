@@ -4,7 +4,7 @@ from bubble import Bubble
 
 class BubbleMap(Group):
 
-    def __init__(self, sprites: Bubble):
+    def __init__(self, *sprites):
         """
 
         :type sprites: bubble.Bubble
@@ -33,4 +33,7 @@ class BubbleMap(Group):
         self._sprite_dict.clear()
 
     def get(self, address):
-        return self._sprite_dict[address]
+        if address in self._sprite_dict.keys():
+            return self._sprite_dict[address]
+
+        return None
