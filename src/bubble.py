@@ -5,7 +5,7 @@ from pygame.math import Vector2
 class Bubble(pygame.sprite.Sprite):
 
     def __init__(self, address, pos, radius, fill_color, stroke_color, angle=90, velocity=0, *groups):
-        pygame.sprite.Sprite.__init__(self, *groups)
+        super().__init__(*groups)
         self.image = pygame.Surface((radius * 2, radius * 2))
         self.image.set_colorkey(pygame.Color('MAGENTA'))
         self.rect = self.image.get_rect(center=pos)
