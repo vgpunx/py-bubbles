@@ -1,4 +1,5 @@
-import sys, pygame, collections, hex_map
+import sys, pygame, collections, hex_map, math
+from hex_cell import HexCell
 from pygame.locals import *
 
 
@@ -22,10 +23,11 @@ def main():
     clock = pygame.time.Clock()
 
     # now the hex stuff
-    hexsize = (20, 20)
+    hexsize = (30, 30)
     cell_or = 'pointy'
 
     hexmap = hex_map.HexMap(screensize, hexsize, hex_orientation=cell_or)
+    print("The pixel position of the center of cell (0,0) is {0}.".format(hexmap.get_pixeladdressbycell((0, 0))))
     counter = 0
     # main loop
     while True:
@@ -33,13 +35,42 @@ def main():
         if counter < len(hexmap.board):
             keys = list(hexmap.board.keys())
             hexmap.board.get(keys[counter]).paint(background)
-            screen.blit(background, (0, 0))
             counter += 1
 
-        pygame.event.pump()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                print("MouseButton {0} click.".format(event.button))
+                if event.button == 1:  # left click
+                    print("\tClick at pixel address {0}; translated to cell address {1}".format(event.pos, hexmap.get_celladdressbypixel(event.pos)))
+                    cell = hexmap.board.get(hexmap.get_celladdressbypixel(event.pos))
+
+                    if cell is not None:
+                        cell.paint(background, color='BLUE', width=0)
+
+            if event.type == pygame.MOUSEBUTTONUP:
+                print("MouseButton {0} release.".format(event.button))
+                if event.button == 1:
+                    cell = hexmap.board.get(hexmap.get_celladdressbypixel(event.pos))
+
+                    if cell is not None:
+                        cell.paint(background, color='WHITE', width=0)
+                        cell.paint(background, color='BLACK', width=2)
+
+        # write to screen
+        pos_text = pygame.font.Font(pygame.font.get_default_font(), 12).render(
+            "Cursor POS: {0}".format(pygame.mouse.get_pos()), True, pygame.Color("BLUE"))
+
+        screen.blit(background, (0, 0))
+        screen.blit(
+            pos_text,
+            (
+                20,
+                (screensize[1] - pos_text.get_rect().size[1]) - 20
+            )
+        )
 
         pygame.display.update()
         clock.tick(60)

@@ -63,8 +63,7 @@ class HexCell(object):
 
         return Point(size.x * math.cos(angle), size.y * math.sin(angle))
 
-    @staticmethod
-    def __cube_to_pixel__(layout, cubecoord):
+    def __cube_to_pixel__(self, layout, cubecoord):
         """
         Convert cube hex coordinates to pixel position.
         :param layout: Named tuple with 3 fields.
@@ -79,8 +78,7 @@ class HexCell(object):
 
         return Point(int(x + origin.x), int(y + origin.y))
 
-    @staticmethod
-    def __pixel_to_cube__(layout, pixel_coords):
+    def __pixel_to_cube__(self, layout, pixel_coords):
         """
         Convert pixel coordinates to hex cube position.
         :param layout:
@@ -102,10 +100,8 @@ class HexCell(object):
         As currently written this is intended primarily for debugging.
         :surface: Pass in the object of class pygame.Surface to blit to.
         """
-
         pygame.draw.polygon(surface, pygame.Color(color), self.get_polygon_corners(self.layout, self.cubepos),
-            width
-        )
+                            width)
         font = pygame.font.Font(pygame.font.get_default_font(), 10)
         text = font.render('{0}, {1}'.format(self.axialpos.x, self.axialpos.y), False, pygame.Color("RED"))
         surface.blit(text, (self.get_pixelpos().x - (text.get_size()[0] / 2), self.get_pixelpos().y))

@@ -1,4 +1,4 @@
-import math, collections, pygame
+import math, collections
 from src.hexamaplib.hex_cell import HexCell
 
 
@@ -31,6 +31,10 @@ class HexMap:
         self.hextype = hex_orientation.lower()
         self.cellsize = self.Point(cellsize[0], cellsize[1])
 
+        # hex center offset from the 0,0 pixel position
+        self.origin = self.cellsize
+
+
         # Calculate cell count from cell size and surface size:
         # colcount = s / (Rc * 1.50)
         # rowcount = s / (math.sqrt(3) / 2) * (Ri * 2)
@@ -58,12 +62,12 @@ class HexMap:
                 math.sqrt(3.0),         # f0
                 math.sqrt(3.0) / 2.0,   # f1
                 0.0,                    # f2
-                3.0 / 2.0,              # f3
+                float(3.0 / 2.0),              # f3
                 math.sqrt(3.0) / 3.0,   # b0
                 -1.0 / 3.0,             # b1
                 0.0,                    # b2
-                2.0 / 3.0,              # b3
-                0.5                     # start_angle
+                float(2.0 / 3.0),              # b3
+                float(0.5)                     # start_angle
             )
 
             self.cellcount = self.Point(int(self.surface_size[0] // rowcount),
@@ -74,6 +78,7 @@ class HexMap:
 
         self.board = self.populate_board()
 
+
     def get_celladdressbypixel(self, pixel_coords):
         """
         Convert pixel coordinates to hex cube position.
@@ -83,14 +88,18 @@ class HexMap:
         """
         M = self.hex_orientation
         size = self.cellsize
-        origin = self.Point(0, 0)
-        pt = self.Point((pixel_coords[0] - origin.x) / size.x, (pixel_coords[1] - origin.y) / size.y)
+        origin = self.origin
+        pt = self.Point(
+            (pixel_coords[0] - origin.x) / size.x,
+            (pixel_coords[1] - origin.y) / size.y
+        )
         q = (M.b0 * pt.x) + (M.b1 * pt.y)
         r = (M.b2 * pt.x) + (M.b3 * pt.y)
 
         rslt = self.hex_round(self.CubeCoord(q, r, -q - r))
 
         return (rslt.q, rslt.r)
+
 
     def get_pixeladdressbycell(self, cubecoord):
         """
@@ -101,11 +110,12 @@ class HexMap:
         """
         M = self.hex_orientation
         size = self.cellsize
-        origin = self.Point(0, 0)
+        origin = self.origin
         x = (M.f0 * cubecoord[0] + M.f1 * cubecoord[1]) * size.x
         y = (M.f2 * cubecoord[0] + M.f3 * cubecoord[1]) * size.y
 
         return (int(x + origin.x), int(y + origin.y))
+
 
     def find_cell_by_pixel(self, pixel_address):
         for cell in self.board.values():
@@ -114,8 +124,10 @@ class HexMap:
 
         return None
 
+
     def hex_add(self, a, b):
         return self.CubeCoord(a.q + b.q, a.r + b.r, a.s + b.s)
+
 
     def axial_add(self, a, b):
         a_cube = self.CubeCoord(a[0], a[1], -a[0] - a[1])
@@ -125,8 +137,10 @@ class HexMap:
 
         return cube_res.q, cube_res.r
 
+
     def hex_subtract(self, a, b):
         return self.CubeCoord(a.q - b.q, a.r - b.r, a.s - b.s)
+
 
     def axial_subtract(self, a, b):
         a_cube = self.CubeCoord(a[0], a[1], -a[0] - a[1])
@@ -136,14 +150,18 @@ class HexMap:
 
         return cube_res.q, cube_res.r
 
+
     def hex_scale(self, a, k):
         return self.CubeCoord(a.q * k, a.r * k, a.s * k)
+
 
     def hex_rotate_left(self, a):
         return self.CubeCoord(-a.s, -a.q, -a.r)
 
+
     def hex_rotate_right(self, a):
         return self.CubeCoord(-a.r, -a.s, -a.q)
+
 
     def hex_direction(self, direction):
         hex_directions = [self.CubeCoord(1, 0, -1), self.CubeCoord(1, -1, 0), self.CubeCoord(0, -1, 1),
@@ -151,11 +169,13 @@ class HexMap:
 
         return hex_directions[direction]
 
+
     def hex_neighbor(self, cell, direction):
         hex_directions = [self.CubeCoord(1, 0, -1), self.CubeCoord(1, -1, 0), self.CubeCoord(0, -1, 1),
                           self.CubeCoord(-1, 0, 1), self.CubeCoord(-1, 1, 0), self.CubeCoord(0, 1, -1)]
 
         return self.hex_add(cell, hex_directions[direction])
+
 
     def hex_allneighbors(self, cell):
         cell_cube = self.CubeCoord(cell[0], cell[1], -cell[0] - cell[1])
@@ -173,33 +193,37 @@ class HexMap:
 
         return self.hex_add(cell, hex_diagonals[direction])
 
+
     def hex_length(self, cell):
         return (abs(cell.q) + abs(cell.r) + abs(cell.s)) // 2
+
 
     def hex_distance(self, a, b):
         return self.hex_length(self.hex_subtract(a, b))
 
+
     def hex_round(self, cell):
-        q = int(cell.q)
-        r = int(cell.r)
-        s = int(cell.s)
-        q_diff = abs(q - cell.q)
-        r_diff = abs(r - cell.r)
-        s_diff = abs(s - cell.s)
+        qi = int(round(cell.q))
+        ri = int(round(cell.r))
+        si = int(round(cell.s))
+        q_diff = abs(qi - cell.q)
+        r_diff = abs(ri - cell.r)
+        s_diff = abs(si - cell.s)
 
-        if q + r + s != 0:
-            if q_diff > r_diff and q_diff > s_diff:
-                q = -r - s
+        if q_diff > r_diff and q_diff > s_diff:
+            qi = -ri - si
+        else:
+            if r_diff > s_diff:
+                ri = -qi - si
             else:
-                if r_diff > s_diff:
-                    r = -q - s
-                else:
-                    s = -q - r
+                si = -qi - ri
 
-        return self.CubeCoord(q, r, s)
+        return self.CubeCoord(qi, ri, si)
+
 
     def hex_lerp(self, a, b, t):
         return self.CubeCoord(a.q * (1 - t) + b.q * t, a.r * (1 - t) + b.r * t, a.s * (1 - t) + b.s * t)
+
 
     def hex_linedraw(self, a, b):
         N = self.hex_distance(a, b)
@@ -213,6 +237,29 @@ class HexMap:
 
         return results
 
+
+    def __test_fit__(self, cell, area):
+        """
+        Tests a cell's pixel position to validate it fits within the provided area.
+
+        :param cell: Hexcell
+        :param area: Tuple
+        :param orientation:
+        :return: boolean
+        """
+
+        if self.hextype == "pointy":
+            test_cellsize = self.Point(self.cellsize[0] * 0.75, self.cellsize[1])
+
+        elif self.hextype == "flat":
+            test_cellsize = self.Point(self.cellsize[0], self.cellsize[1] * 0.75)
+
+        else:
+            raise AttributeError("Value for parameter 'orientation' must be one of ('pointy', 'flat').")
+
+        return cell.pixel_pos.x + test_cellsize.x < area[0] and cell.pixel_pos.y + test_cellsize.y < area[1]
+
+
     def populate_board(self):
         board = {}
         # r and q switch for flat or pointy
@@ -224,18 +271,15 @@ class HexMap:
                     # start in 0,0 + radius
                     newcell = HexCell(
                         self.Point(q, r),
-                        self.Layout(
-                            self.hex_orientation, self.cellsize,
-                                self.Point(self.cellsize[0], self.cellsize[1])
-                            )
+                        self.Layout(self.hex_orientation, self.cellsize, self.origin)
                     )
 
                     # test fit
-                    if newcell.pixel_pos.x + self.cellsize[0] > self.surface_size[0] or \
-                        newcell.pixel_pos.y + self.cellsize[1] > self.surface_size[1]:
-                        continue
-                    else:
+                    if self.__test_fit__(newcell, self.surface_size):
                         board[(q, r)] = newcell
+
+                    continue
+
 
         elif self.hextype == 'flat':
             for q in range(self.cellcount.x):
@@ -244,15 +288,13 @@ class HexMap:
                     # start in 0,0 + radius
                     newcell = HexCell(
                         self.Point(q, r),
-                        self.Layout(self.hex_orientation, self.cellsize,
-                                    self.Point(self.cellsize[0], self.cellsize[1]))
+                        self.Layout(self.hex_orientation, self.cellsize, self.origin)
                     )
 
                     # test fit
-                    if newcell.pixel_pos.x + self.cellsize[0] > self.surface_size[0] or \
-                        newcell.pixel_pos.y + self.cellsize[1] > self.surface_size[1]:
-                        continue
-                    else:
+                    if self.__test_fit__(newcell, self.surface_size):
                         board[(q, r)] = newcell
+
+                    continue
 
         return board

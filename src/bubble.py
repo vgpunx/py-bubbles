@@ -4,8 +4,8 @@ from pygame.math import Vector2
 
 class Bubble(pygame.sprite.Sprite):
 
-    def __init__(self, address, pos, bounds, radius, fill_color, stroke_color, angle=90, velocity=0, *groups):
-        pygame.sprite.Sprite.__init__(self, *groups)
+    def __init__(self, address, pos, radius, fill_color, stroke_color, angle=90, velocity=0, *groups):
+        super().__init__(*groups)
         self.image = pygame.Surface((radius * 2, radius * 2))
         self.image.set_colorkey(pygame.Color('MAGENTA'))
         self.rect = self.image.get_rect(center=pos)
@@ -15,7 +15,7 @@ class Bubble(pygame.sprite.Sprite):
         self.pos = Vector2(pos)
         self.angle = angle
         self.velocity = Vector2(1, 0).rotate(-self.angle) * velocity
-        self.bounds = bounds
+        # self.bounds = bounds
 
         # for drawing placeholder images
         # this will be replaced with actual image code later
@@ -32,14 +32,15 @@ class Bubble(pygame.sprite.Sprite):
         delta = self.velocity.angle_to(Vector2(1, 0).rotate(-self.angle))
         self.velocity = self.velocity.rotate(delta)
 
-    def set_position(self, coords: list):
-        self.pos = Vector2(coords)
+    def set_position(self, grid_addr, pixel_addr: list):
+        self.pos = Vector2(pixel_addr)
         self.rect.center = self.pos
+        self.grid_address = grid_addr
 
     def update(self, *args):
         super().update(*args)
         self.move(self.velocity)
-        self.bounce()
+        # self.bounce()
 
     def draw(self):
         # placeholder code
@@ -54,22 +55,15 @@ class Bubble(pygame.sprite.Sprite):
         self.pos += direction
         self.rect.center = self.pos
 
-    def bounce(self):
-        bounce = False
+    def bounce(self, collision_vector):
+        """
+        Updates internal velocity vector with one that is reflected off of the given collision vector.
+        :param collision_vector: pygame.math.Vector2
+        :return: None
+        """
 
-        if self.rect.top <= self.bounds.top:
-            norm = Vector2(0, 1)
-            bounce = True
+        self.velocity = self.velocity.reflect(collision_vector.rotate(90).normalize())
 
-        elif self.rect.left <= self.bounds.left or self.rect.right >= self.bounds.right:
-            norm = Vector2(1, 0)
-            bounce = True
-
-        if bounce:
-            self.velocity = self.velocity.reflect(norm)
-            self.move(self.velocity)
-
-            # yes, i'm happy with this solution
 
     # overload placeholders
     def add(self, *groups):
