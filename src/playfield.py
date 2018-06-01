@@ -89,19 +89,28 @@ class Playfield:
                         break
 
                     # correct rounding errors
-                    elif mv_cur_address not in self.hexmap.board.keys() or mv_cur_address not in spr_neighbors:
+                    keys = self.hexmap.board.keys()
+
+                    if mv_cur_address not in spr_neighbors or mv_cur_address not in keys:
                         # TODO: Validate new address isn't already occupied or enclosed!
                         # make small adjustments to addr until we find the correct one
-
-                        if DEBUG:
-                            print("Correcting for rounding errors...")
 
                         for i in (1, -1):
                             test0 = (mv_cur_address[0] + i, mv_cur_address[1])
                             test1 = (mv_cur_address[0], mv_cur_address[1] + i)
 
-                            if DEBUG:
-                                print("\tChecking address {0}".format(test0))
+                            if test0 in keys:
+                                if self.__test_shared_rings__(test0, spr.grid_address) \
+                                        and not self.__test_occupied__(test0) \
+                                        and not self.__test_surrounded__(test0):
+                                    mv_cur_address = test0
+                                    break
+                            elif test1 in keys:
+                                if self.__test_shared_rings__(test1, spr.grid_address) \
+                                        and not self.__test_occupied__(test1) \
+                                        and not self.__test_surrounded__(test1):
+                                    mv_cur_address = test1
+                                    break
 
                             if not self.__test_occupied__(test0) \
                                     and test0 in spr_neighbors \
@@ -192,11 +201,8 @@ class Playfield:
 
 
     def __test_blocked__(self, cur_celladdr, dest_celladdr):
-        a = self.hexmap.CubeCoord(cur_celladdr[0], cur_celladdr[1], -cur_celladdr[0] - cur_celladdr[1])
-        b = self.hexmap.CubeCoord(dest_celladdr[0], dest_celladdr[1], -dest_celladdr[0] - dest_celladdr[1])
-
-        for celladdr in self.hexmap.hex_linedraw(a, b):
-            if isinstance(self.bubble_map.get((celladdr.q, celladdr.r)), Bubble):
+        for celladdr in self.hexmap.hex_linedraw(cur_celladdr, dest_celladdr):
+            if isinstance(self.bubble_map.get(celladdr), Bubble):
                 return True
 
         return False

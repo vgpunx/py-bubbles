@@ -7,7 +7,7 @@ class BubbleMap(Group):
     def __init__(self, *sprites):
         """
 
-        :type sprites: bubble.Bubble
+        :type *sprites: bubble.Bubble
         """
         super().__init__(*sprites)
 
@@ -33,7 +33,8 @@ class BubbleMap(Group):
         self._sprite_dict.clear()
 
     def get(self, address):
-        if address in self._sprite_dict.keys():
+        try:
             return self._sprite_dict[address]
 
-        return None
+        except KeyError:
+            return None
