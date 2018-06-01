@@ -5,6 +5,7 @@ import collections
 from pygame.math import Vector2
 from src.bubble import Bubble
 from src.shooter import Shooter
+from src.bubblemap import BubbleMap
 from src.hexamaplib.hex_map import HexMap
 from src.constants import *
 from pygame.locals import *
@@ -29,7 +30,7 @@ class Playfield:
 
         # sprite groups
         self.all_sprites = pygame.sprite.Group()
-        self.bubble_map = pygame.sprite.Group()  # i think i need a new class here
+        self.bubble_map = BubbleMap()  # i think i need a new class here
         self.active_bubble = pygame.sprite.GroupSingle()
         self.next_bubble = pygame.sprite.GroupSingle()
         self.disloc_bubbles = pygame.sprite.Group()
@@ -82,23 +83,28 @@ class Playfield:
                     #     break
 
                     # correct rounding errors
-                    if mv_cur_address not in spr_neighbors:
+                    keys = self.hexmap.board.keys()
+
+                    if mv_cur_address not in spr_neighbors or mv_cur_address not in keys:
                         # TODO: Validate new address isn't already occupied or enclosed!
                         # make small adjustments to addr until we find the correct one
+
                         for i in (1, -1):
                             test0 = (mv_cur_address[0] + i, mv_cur_address[1])
                             test1 = (mv_cur_address[0], mv_cur_address[1] + i)
 
-                            if self.__test_shared_rings__(test0, spr.grid_address) \
-                                    and not self.__test_occupied__(test0) \
-                                    and not self.__test_surrounded__(test0):
-                                mv_cur_address = test0
-                                break
-                            elif self.__test_shared_rings__(test1, spr.grid_address) \
-                                    and not self.__test_occupied__(test1) \
-                                    and not self.__test_surrounded__(test1):
-                                mv_cur_address = test1
-                                break
+                            if test0 in keys:
+                                if self.__test_shared_rings__(test0, spr.grid_address) \
+                                        and not self.__test_occupied__(test0) \
+                                        and not self.__test_surrounded__(test0):
+                                    mv_cur_address = test0
+                                    break
+                            elif test1 in keys:
+                                if self.__test_shared_rings__(test1, spr.grid_address) \
+                                        and not self.__test_occupied__(test1) \
+                                        and not self.__test_surrounded__(test1):
+                                    mv_cur_address = test1
+                                    break
 
                     mv.grid_address = mv_cur_address
                     dest_cell = self.hexmap.board.get(mv.grid_address)
@@ -148,7 +154,7 @@ class Playfield:
         counter = 0
 
         for celladdr in self.hexmap.hex_allneighbors(celladdr):
-            if isinstance(self.hexmap.board.get(celladdr), Bubble):
+            if isinstance(self.bubble_map.get(celladdr), Bubble):
                 counter += 1
 
         if counter == 5:
@@ -159,7 +165,7 @@ class Playfield:
 
     def __test_blocked__(self, cur_celladdr, dest_celladdr):
         for celladdr in self.hexmap.hex_linedraw(cur_celladdr, dest_celladdr):
-            if isinstance(self.hexmap.board.get(celladdr), Bubble):
+            if isinstance(self.bubble_map.get(celladdr), Bubble):
                 return True
 
         return False

@@ -102,10 +102,8 @@ class HexCell(object):
         As currently written this is intended primarily for debugging.
         :surface: Pass in the object of class pygame.Surface to blit to.
         """
-
         pygame.draw.polygon(surface, pygame.Color(color), self.get_polygon_corners(self.layout, self.cubepos),
-            width
-        )
+                            width)
         font = pygame.font.Font(pygame.font.get_default_font(), 10)
         text = font.render('{0}, {1}'.format(self.axialpos.x, self.axialpos.y), False, pygame.Color("RED"))
         surface.blit(text, (self.get_pixelpos().x - (text.get_size()[0] / 2), self.get_pixelpos().y))

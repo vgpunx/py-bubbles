@@ -1,4 +1,4 @@
-import math, collections, pygame
+import math, collections
 from src.hexamaplib.hex_cell import HexCell
 
 
@@ -31,6 +31,7 @@ class HexMap:
         self.hextype = hex_orientation.lower()
         self.cellsize = self.Point(cellsize[0], cellsize[1])
 
+
         # Calculate cell count from cell size and surface size:
         # colcount = s / (Rc * 1.50)
         # rowcount = s / (math.sqrt(3) / 2) * (Ri * 2)
@@ -58,20 +59,25 @@ class HexMap:
                 math.sqrt(3.0),         # f0
                 math.sqrt(3.0) / 2.0,   # f1
                 0.0,                    # f2
-                3.0 / 2.0,              # f3
+                float(3.0 / 2.0),              # f3
                 math.sqrt(3.0) / 3.0,   # b0
                 -1.0 / 3.0,             # b1
                 0.0,                    # b2
-                2.0 / 3.0,              # b3
-                0.5                     # start_angle
+                float(2.0 / 3.0),              # b3
+                float(0.5)                     # start_angle
             )
 
             self.cellcount = self.Point(int(self.surface_size[0] // rowcount),
                                         int(self.surface_size[1] // colcount))
 
+            # hex center offset from the 0,0 pixel position
+            # self.origin = self.Point(int((math.sqrt(3) * self.cellsize.x) / 2), self.cellsize.y)
+            self.origin = self.cellsize
+
         else:
             raise Exception('Value of hex_orientation must be either "flat" or "pointy."')
 
+        print(self.hex_orientation)
         self.board = self.populate_board()
 
 
@@ -84,8 +90,11 @@ class HexMap:
         """
         M = self.hex_orientation
         size = self.cellsize
-        origin = self.Point(0, 0)
-        pt = self.Point((pixel_coords[0] - origin.x) / size.x, (pixel_coords[1] - origin.y) / size.y)
+        origin = self.origin
+        pt = self.Point(
+            (pixel_coords[0] - origin.x) / size.x,
+            (pixel_coords[1] - origin.y) / size.y
+        )
         q = (M.b0 * pt.x) + (M.b1 * pt.y)
         r = (M.b2 * pt.x) + (M.b3 * pt.y)
 
@@ -103,7 +112,7 @@ class HexMap:
         """
         M = self.hex_orientation
         size = self.cellsize
-        origin = self.Point(0, 0)
+        origin = self.origin
         x = (M.f0 * cubecoord[0] + M.f1 * cubecoord[1]) * size.x
         y = (M.f2 * cubecoord[0] + M.f3 * cubecoord[1]) * size.y
 
@@ -196,23 +205,22 @@ class HexMap:
 
 
     def hex_round(self, cell):
-        q = int(cell.q)
-        r = int(cell.r)
-        s = int(cell.s)
-        q_diff = abs(q - cell.q)
-        r_diff = abs(r - cell.r)
-        s_diff = abs(s - cell.s)
+        qi = int(cell.q)
+        ri = int(cell.r)
+        si = int(cell.s)
+        q_diff = abs(qi - cell.q)
+        r_diff = abs(ri - cell.r)
+        s_diff = abs(si - cell.s)
 
-        if q + r + s != 0:
-            if q_diff > r_diff and q_diff > s_diff:
-                q = -r - s
+        if q_diff > r_diff and q_diff > s_diff:
+            qi = -ri - si
+        else:
+            if r_diff > s_diff:
+                ri = -qi - si
             else:
-                if r_diff > s_diff:
-                    r = -q - s
-                else:
-                    s = -q - r
+                si = -qi - ri
 
-        return self.CubeCoord(q, r, s)
+        return self.CubeCoord(qi, ri, si)
 
 
     def hex_lerp(self, a, b, t):
@@ -265,10 +273,7 @@ class HexMap:
                     # start in 0,0 + radius
                     newcell = HexCell(
                         self.Point(q, r),
-                        self.Layout(
-                            self.hex_orientation, self.cellsize,
-                                self.Point(self.cellsize[0], self.cellsize[1])
-                            )
+                        self.Layout(self.hex_orientation, self.cellsize, self.origin)
                     )
 
                     # test fit
@@ -285,8 +290,7 @@ class HexMap:
                     # start in 0,0 + radius
                     newcell = HexCell(
                         self.Point(q, r),
-                        self.Layout(self.hex_orientation, self.cellsize,
-                                    self.Point(self.cellsize[0], self.cellsize[1]))
+                        self.Layout(self.hex_orientation, self.cellsize, self.origin)
                     )
 
                     # test fit
