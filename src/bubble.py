@@ -32,9 +32,10 @@ class Bubble(pygame.sprite.Sprite):
         delta = self.velocity.angle_to(Vector2(1, 0).rotate(-self.angle))
         self.velocity = self.velocity.rotate(delta)
 
-    def set_position(self, coords: list):
-        self.pos = Vector2(coords)
+    def set_position(self, grid_addr, pixel_addr: list):
+        self.pos = Vector2(pixel_addr)
         self.rect.center = self.pos
+        self.grid_address = grid_addr
 
     def update(self, *args):
         super().update(*args)

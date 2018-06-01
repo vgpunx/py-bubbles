@@ -52,6 +52,19 @@ def main():
         playfield.update()
         screen.blit(playfield.image, playfield_pos)
 
+        # write to screen
+        if DEBUG:
+            pos_text = pygame.font.Font(pygame.font.get_default_font(), 12).render(
+                "Cursor POS: {0}".format(pygame.mouse.get_pos()), True, pygame.Color("WHITE"))
+
+            screen.blit(
+                pos_text,
+                (
+                    20,
+                    (DISP_SIZE[1] - pos_text.get_rect().size[1]) - 20
+                )
+            )
+
         # this is the event handler, which we should move to src.Control
         # this is where any graphical updates are blitted to the display
         for event in pygame.event.get():
@@ -60,22 +73,13 @@ def main():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    fire_test(playfield, ball_angle)
-
-                    if ball_angle < 160:
-                        ball_angle += 5
-                    else:
-                        ball_angle = 20
-
-                    break
+                    fire_test(playfield, playfield.shooter.angle)
 
                 elif event.key == pygame.K_a:
-                    pygame.transform.rotate(playfield.shooter.image, 2)
-                    break
+                    playfield.shooter.rotate(2)
 
                 elif event.key == pygame.K_d:
-                    pygame.transform.rotate(playfield.shooter.image, -2)
-                    break
+                    playfield.shooter.rotate(-2)
 
 
         # update the display to show changes

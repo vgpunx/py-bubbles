@@ -37,7 +37,6 @@ def main():
             hexmap.board.get(keys[counter]).paint(background)
             counter += 1
 
-        pygame.event.pump()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
@@ -60,7 +59,19 @@ def main():
                         cell.paint(background, color='WHITE', width=0)
                         cell.paint(background, color='BLACK', width=2)
 
+        # write to screen
+        pos_text = pygame.font.Font(pygame.font.get_default_font(), 12).render(
+            "Cursor POS: {0}".format(pygame.mouse.get_pos()), True, pygame.Color("BLUE"))
+
         screen.blit(background, (0, 0))
+        screen.blit(
+            pos_text,
+            (
+                20,
+                (screensize[1] - pos_text.get_rect().size[1]) - 20
+            )
+        )
+
         pygame.display.update()
         clock.tick(60)
 

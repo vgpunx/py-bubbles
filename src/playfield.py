@@ -74,78 +74,18 @@ class Playfield:
                 if pygame.sprite.collide_circle(mv, spr):
                     # the idea here is to slow down, find the direction to the nearest sprite,
                     # and move the sprite until it touches at least two others
-                    mv.set_position(mv.rect.clamp(self.rect).center)
-                    spr_neighbors = self.hexmap.hex_allneighbors(spr.grid_address)
+                    mv.set_position(mv.grid_address, mv.rect.clamp(self.rect).center)
                     mv_cur_address = self.hexmap.get_celladdressbypixel(mv.rect.center)
 
                     if DEBUG:
                         print("I think I'm in cell {0}.".format(mv_cur_address))
 
-                    if mv_cur_address in spr_neighbors \
-                        and not self.__test_occupied__(mv_cur_address):
-                        if DEBUG:
-                            print("\tThis seems good, let's stay here.")
-
-                        break
-
-                    # correct rounding errors
-                    keys = self.hexmap.board.keys()
-
-                    if mv_cur_address not in spr_neighbors or mv_cur_address not in keys:
-                        # TODO: Validate new address isn't already occupied or enclosed!
-                        # make small adjustments to addr until we find the correct one
-
-                        for i in (1, -1):
-                            test0 = (mv_cur_address[0] + i, mv_cur_address[1])
-                            test1 = (mv_cur_address[0], mv_cur_address[1] + i)
-
-                            if test0 in keys:
-                                if self.__test_shared_rings__(test0, spr.grid_address) \
-                                        and not self.__test_occupied__(test0) \
-                                        and not self.__test_surrounded__(test0):
-                                    mv_cur_address = test0
-                                    break
-                            elif test1 in keys:
-                                if self.__test_shared_rings__(test1, spr.grid_address) \
-                                        and not self.__test_occupied__(test1) \
-                                        and not self.__test_surrounded__(test1):
-                                    mv_cur_address = test1
-                                    break
-
-                            if not self.__test_occupied__(test0) \
-                                    and test0 in spr_neighbors \
-                                    and test0 in self.hexmap.board.keys():
-                                    mv_cur_address = test0
-
-                                    if DEBUG:
-                                        print("\tAddress {0} seems to be good, let's go with that".format(test0))
-
-                                    break
-
-                            if DEBUG:
-                                print("\tChecking address {0}".format(test1))
-
-                            elif not self.__test_occupied__(test1) \
-                                    and test1 in spr_neighbors \
-                                    and test1 in self.hexmap.board.keys():
-                                    mv_cur_address = test1
-
-                                    if DEBUG:
-                                        print("\tAddress {0} seems to be good, let's go with that".format(test1))
-
-                                    break
-
-                            else:
-                                continue
-
-                    if DEBUG:
-                        print("My new address is {0}".format(mv_cur_address))
-
                     mv.grid_address = mv_cur_address
                     dest_cell = self.hexmap.board.get(mv.grid_address)
 
                     mv.set_velocity(0)
-                    mv.set_position(dest_cell.get_pixelpos())
+                    mv.set_position(dest_cell.axialpos, dest_cell.get_pixelpos())
+
                     # move the active bubble to the map
                     self.bubble_map.add(mv)
                     self.active_bubble.remove(mv)
@@ -154,62 +94,6 @@ class Playfield:
 
                 continue
 
-    def __test_shared_rings__(self, celladdr_1, celladdr_2):
-        """
-        Validates two cells share neighborhood rings.
-        :param celladdr_1: Tuple
-        :param celladdr_2: Tuple
-        :return: boolean
-        """
-        cell_1_neighbors = self.hexmap.hex_allneighbors(celladdr_1)
-        cell_2_neighbors = self.hexmap.hex_allneighbors(celladdr_2)
-
-        if celladdr_1 in cell_2_neighbors and celladdr_2 in cell_1_neighbors:
-            return True
-
-
-        return False
-
-
-    def __test_occupied__(self, celladdr):
-        """
-        Validates a cell is occupied by a Bubble.
-        :param celladdr: Tuple
-        :return: boolean
-        """
-
-        return isinstance(self.bubble_map.get(celladdr), Bubble)
-
-
-    def __test_surrounded__(self, celladdr):
-        """
-        Validates a cell is surrounded by Bubbles.
-        :param celladdr: Tuple
-        :return: boolean
-        """
-
-        counter = 0
-
-        for celladdr in self.hexmap.hex_allneighbors(celladdr):
-            if isinstance(self.bubble_map.get(celladdr), Bubble):
-                counter += 1
-
-        if counter == 5:
-            return True
-
-        return False
-
-
-    def __test_blocked__(self, cur_celladdr, dest_celladdr):
-        for celladdr in self.hexmap.hex_linedraw(cur_celladdr, dest_celladdr):
-            if isinstance(self.bubble_map.get(celladdr), Bubble):
-                return True
-
-        return False
-
-
-    def get_surface(self):
-        return self.image
 
     def load_map(self, filepath):
         try:
@@ -234,13 +118,12 @@ class Playfield:
 
             # shooter sprite
             # shooter_pos = self.rect.midbottom
-            self.shooter = Shooter((0,0), 0, self.all_sprites)
-            self.shooter.rect.midbottom = (self.rect.midbottom[0] + 10, self.rect.midbottom[1] - 20)
+            self.shooter = Shooter((0,0), self.all_sprites)
+            self.shooter.rect.midbottom = (self.rect.midbottom[0], self.rect.midbottom[1] - 20)
 
             # debug
             if DEBUG:
                 print("Playfield dimensions: {0}".format(self.area_params))
-                print(self.shooter)
                 self.dbgsurf = pygame.Surface(self.area_params)
                 self.dbgsurf.fill(pygame.Color(self.colorkey))
                 self.dbgsurf.convert()

@@ -63,8 +63,7 @@ class HexCell(object):
 
         return Point(size.x * math.cos(angle), size.y * math.sin(angle))
 
-    @staticmethod
-    def __cube_to_pixel__(layout, cubecoord):
+    def __cube_to_pixel__(self, layout, cubecoord):
         """
         Convert cube hex coordinates to pixel position.
         :param layout: Named tuple with 3 fields.
@@ -79,8 +78,7 @@ class HexCell(object):
 
         return Point(int(x + origin.x), int(y + origin.y))
 
-    @staticmethod
-    def __pixel_to_cube__(layout, pixel_coords):
+    def __pixel_to_cube__(self, layout, pixel_coords):
         """
         Convert pixel coordinates to hex cube position.
         :param layout:

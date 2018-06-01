@@ -31,6 +31,9 @@ class HexMap:
         self.hextype = hex_orientation.lower()
         self.cellsize = self.Point(cellsize[0], cellsize[1])
 
+        # hex center offset from the 0,0 pixel position
+        self.origin = self.cellsize
+
 
         # Calculate cell count from cell size and surface size:
         # colcount = s / (Rc * 1.50)
@@ -70,14 +73,9 @@ class HexMap:
             self.cellcount = self.Point(int(self.surface_size[0] // rowcount),
                                         int(self.surface_size[1] // colcount))
 
-            # hex center offset from the 0,0 pixel position
-            # self.origin = self.Point(int((math.sqrt(3) * self.cellsize.x) / 2), self.cellsize.y)
-            self.origin = self.cellsize
-
         else:
             raise Exception('Value of hex_orientation must be either "flat" or "pointy."')
 
-        print(self.hex_orientation)
         self.board = self.populate_board()
 
 
@@ -205,9 +203,9 @@ class HexMap:
 
 
     def hex_round(self, cell):
-        qi = int(cell.q)
-        ri = int(cell.r)
-        si = int(cell.s)
+        qi = int(round(cell.q))
+        ri = int(round(cell.r))
+        si = int(round(cell.s))
         q_diff = abs(qi - cell.q)
         r_diff = abs(ri - cell.r)
         s_diff = abs(si - cell.s)
