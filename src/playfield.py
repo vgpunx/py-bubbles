@@ -80,6 +80,11 @@ class Playfield:
                     if DEBUG:
                         print("I think I'm in cell {0}.".format(mv_cur_address))
 
+                    # validate cell exists
+                    while mv_cur_address not in self.hexmap.board.keys():
+                        # TODO: Figure out what direction to shift the bubble
+                        mv_cur_address = (mv_cur_address[0] - 1, mv_cur_address[1])
+
                     mv.grid_address = mv_cur_address
                     dest_cell = self.hexmap.board.get(mv.grid_address)
 
