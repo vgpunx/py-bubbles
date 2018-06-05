@@ -24,6 +24,9 @@ class Bubble(pygame.sprite.Sprite):
         self.stroke = pygame.Color(stroke_color)
         self.draw()
 
+        # game properties
+        self.type_property = fill_color  # temporary value
+
     def set_velocity(self, velocity):
         self.velocity = Vector2(1, 0).rotate(-self.angle) * velocity
 

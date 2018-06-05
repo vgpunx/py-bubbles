@@ -4,7 +4,7 @@ from src.settings import Settings
 __all__ = [
     "DISP_SIZE", "PFLD_SIZE", "CELL_SIZE", "DISP_FSCR", "BGM_PATH", "SFX_PATH", "BGI_PATH", "SPR_PATH",
     "BGM_ENABLED", "SFX_ENABLED", "SFX_VOLUME", "BGM_VOLUME", "INPUT_DEV", "MV_UP", "MV_LEFT", "MV_DOWN",
-    "MV_RIGHT", "ACCEPT", "CANCEL", "config", "DEBUG"
+    "MV_RIGHT", "ACCEPT", "CANCEL", "config", "DEBUG", "ALL_TYPEPROPERTIES"
     ]
 
 ## GROK THE CONFIG FILE ##
@@ -36,6 +36,9 @@ BGM_PATH = os.path.join(os.curdir, 'resource', 'audio', 'bgm')
 SFX_PATH = os.path.join(os.curdir, 'resource', 'audio', 'sfx')
 BGI_PATH = os.path.join(os.curdir, 'resource', 'image', 'bkg')
 SPR_PATH = os.path.join(os.curdir, 'resource', 'image', 'sprites')
+
+## GAME PROPERTIES ##
+ALL_TYPEPROPERTIES = ('RED', 'ORANGE', 'YELLOW', 'GREEN', 'BLUE', 'VIOLET', 'GRAY', 'WHITE')
 
 ## DEBUG MODE ##
 DEBUG = True

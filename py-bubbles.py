@@ -125,8 +125,8 @@ def fire_test(playfield: Playfield, angle):
             10,                                                 # velocity
             (playfield.all_sprites, playfield.active_bubble)    # *groups
         )
-        #playfield.active_bubble.add(fire)
-        #playfield.all_sprites.add(fire)
+        # playfield.active_bubble.add(fire)
+        # playfield.all_sprites.add(fire)
 
 if __name__ == "__main__":
     main()

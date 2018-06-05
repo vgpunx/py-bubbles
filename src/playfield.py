@@ -1,7 +1,7 @@
 import math
 import pygame
 import json
-import collections
+from random import Random
 from pygame.math import Vector2
 from src.bubble import Bubble
 from src.shooter import Shooter
@@ -26,7 +26,7 @@ class Playfield:
         self.colorkey = 'WHITE'
 
         self.cell_size = cell_size
-        self.cell_radius = int(cell_size[0] - 2) # this is a magic number, we'll get a better radius method in optimization
+        self.cell_radius = int(cell_size[0] - 2)  # this is a magic number, we'll get a better radius method in optimization
 
         # sprite groups
         self.all_sprites = pygame.sprite.Group()
@@ -35,8 +35,11 @@ class Playfield:
         self.next_bubble = pygame.sprite.GroupSingle()
         self.disloc_bubbles = pygame.sprite.Group()
 
+        # chancey stuff
+        self._rng = Random()
 
         self.load_map(map_file_path)
+        self._generate_nextbubble(self.next_bubble)
 
     def update(self):
         self.image.fill(pygame.Color(self.colorkey))
@@ -49,11 +52,56 @@ class Playfield:
 
         if self.active_bubble:
             self.process_collision()
+            self.active_bubble = self.next_bubble.sprite
+            self._generate_nextbubble(self.next_bubble, self.all_sprites)
 
         # update and paint everything
         self.all_sprites.draw(self.image)
         self.shooter.draw(self.image)
 
+    def _generate_nextbubble(self, *groups):
+        """
+        Generates the next Bubble to be fired.  Weighted toward colors/types already present in map.
+
+        :param spriteGroup:
+        :return:
+        """
+
+        # probably that this will generate a color that is not currently already present in the map
+        rbc = 10
+
+        # colors present in map
+        cpc = self.bubble_map.get_present_types()
+
+        # colors not present in map
+        diff = [item for item in ALL_TYPEPROPERTIES if item not in cpc]
+
+        # ran-dumb in
+        ri = self._rng.randint(0, 100)
+
+        if ri <= rbc:
+            return Bubble(
+                self.hexmap.get_celladdressbypixel(self.shooter.rect.center),   # address
+                self.shooter.rect.center,                                       # pixelpos
+                self.cell_radius,                                               # radius
+                self._rng.choice(diff),                                         # fill_color
+                'BLACK',                                                        # stroke_color
+                self.shooter.angle,                                             # angle
+                0,                                                              # velocity
+                *groups                                                         # *groups
+            )
+
+        else:
+            return Bubble(
+                self.hexmap.get_celladdressbypixel(self.shooter.rect.center),   # address
+                self.shooter.rect.center,                                       # pixelpos
+                self.cell_radius,                                               # radius
+                self._rng.choice(cpc),                                          # fill_color
+                'BLACK',                                                        # stroke_color
+                self.shooter.angle,                                             # angle
+                0,                                                              # velocity
+                *groups                                                         # *groups
+            )
 
     def process_collision(self):
         mv = self.active_bubble.sprite
@@ -81,13 +129,22 @@ class Playfield:
                         print("I think I'm in cell {0}.".format(mv_cur_address))
 
                     # validate cell exists
+                    c = 0
+
                     while mv_cur_address not in self.hexmap.board.keys():
-                        # TODO: Figure out what direction to shift the bubble
-                        if  self.rect.right - mv.rect.right > self.rect.left - mv.rect.left:
+                        if self.rect.right - mv.rect.right > self.rect.left - mv.rect.left:
                             # we're on the right side of the screen.
                             mv_cur_address = (mv_cur_address[0] - 1, mv_cur_address[1])
                         else:
+                            # we're on the left side
                             mv_cur_address = (mv_cur_address[0] + 1, mv_cur_address[1])
+
+                        # additional exit condition
+                        if c == 2:
+                            raise RuntimeWarning("Maximum iteration count {0} reached.".format(c))
+
+                        c += 1
+
 
                     mv.grid_address = mv_cur_address
                     dest_cell = self.hexmap.board.get(mv.grid_address)
@@ -103,7 +160,6 @@ class Playfield:
 
                 continue
 
-
     def load_map(self, filepath):
         try:
             map_toplevel = json.load(open(filepath, 'r'))
@@ -111,8 +167,8 @@ class Playfield:
             map_height = map_toplevel['height']
             map_dict = map_toplevel['map']
 
-        except:
-            raise SystemExit('Unable to read file located at {0}.'.format(filepath))
+        except Exception:
+            raise IOError('Unable to read file located at {0}.'.format(filepath))
 
         try:
             # reset affected properties

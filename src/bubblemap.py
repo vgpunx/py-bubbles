@@ -38,3 +38,17 @@ class BubbleMap(Group):
 
         except KeyError:
             return None
+
+    def get_present_types(self):
+        """
+        Returns a list of unique Bubble types currently present in map.
+
+        :return: List
+        """
+        result = list()
+
+        for item in self._sprite_dict.values():
+            if item.type_property not in result:
+                result.append(item.type_property)
+
+        return result
