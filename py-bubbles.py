@@ -65,21 +65,32 @@ def main():
                 )
             )
 
+        # handle controls for debugging
+        keys = pygame.key.get_pressed()
+        if keys[K_SPACE]:
+            fire_test(playfield, playfield.shooter.angle)
+
+        elif keys[K_a]:
+            playfield.shooter.rotate(1)
+
+        elif keys[K_d]:
+            playfield.shooter.rotate(-1)
+
         # this is the event handler, which we should move to src.Control
         # this is where any graphical updates are blitted to the display
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    fire_test(playfield, playfield.shooter.angle)
-
-                elif event.key == pygame.K_a:
-                    playfield.shooter.rotate(2)
-
-                elif event.key == pygame.K_d:
-                    playfield.shooter.rotate(-2)
+            # if event.type == pygame.KEYDOWN:
+            #     if event.key == pygame.K_SPACE:
+            #         fire_test(playfield, playfield.shooter.angle)
+            #
+            #     elif event.key == pygame.K_a:
+            #         playfield.shooter.rotate(2)
+            #
+            #     elif event.key == pygame.K_d:
+            #         playfield.shooter.rotate(-2)
 
 
         # update the display to show changes

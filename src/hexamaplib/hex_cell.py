@@ -18,11 +18,22 @@ Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
 
 class HexCell(object):
 
-    def __init__(self, axial_coords, layout) -> None:
+    def __init__(self, coords, layout) -> None:
         super().__init__()
-        #self.Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
-        self.axialpos = axial_coords
-        self.cubepos = CubeCoord(axial_coords.x, axial_coords.y, -axial_coords.x - axial_coords.y)
+
+        # support both coord types
+        if len(coords) == 2:
+            # axial coords
+            self.axialpos = coords
+            self.cubepos = CubeCoord(coords[0], coords[1], -coords[0] - coords[1])
+
+        elif len(coords) == 3:
+            self.cubepos = coords
+            self.axialpos = Point(coords[0], coords[1])
+
+        else:
+            raise ValueError("A Tuple with 2 (axial) or 3 (cube) elements is required for the coords parameter.")
+
         self.layout = layout
         self.pixel_pos = self.__cube_to_pixel__(self.layout, self.cubepos)
 
@@ -49,6 +60,75 @@ class HexCell(object):
             corners.append(Point(center.x + offset.x, center.y + offset.y))
 
         return corners
+
+    def __add__(self, other):
+        """
+        Addition (+) operator for hex cells.  This replaces hex_add and axial_add from hex_map.
+
+        :param other: HexCell
+        :return: HexCell
+        """
+        return HexCell(
+            CubeCoord(
+                self.cubepos.q + other.cubepos.q,
+                self.cubepos.r + other.cubepos.r,
+                self.cubepos.s + other.cubepos.s
+            ),
+            self.layout
+        )
+
+    def __iadd__(self, other):
+        """
+        Addition operator for hex cells that supports augmented arithmetic assignment (+=).
+        :param other:
+        :return:
+        """
+
+        # update self
+        self.cubepos = CubeCoord(
+            self.cubepos[0] + other.cubepos[0],
+            self.cubepos[1] + other.cubepos[1],
+            self.cubepos[2] + other.cubepos[2]
+        )
+
+        self.pixel_pos = self.__cube_to_pixel__(self.layout, self.cubepos)
+
+        return self
+
+    def __sub__(self, other):
+        """
+        Subtraction operator for hex cells.  This replaces hex_subtract and axial_subtract from hex_map.
+
+        :param other: HexCell
+        :return: HexCell
+        """
+        return HexCell(
+            CubeCoord(
+                self.cubepos.q - other.cubepos.q,
+                self.cubepos.r - other.cubepos.r,
+                self.cubepos.s - other.cubepos.s
+            ),
+            self.layout
+        )
+
+    def __isub__(self, other):
+        """
+        Subtraction operator for hex cells that supports augmented arithmetic assignment (-=).
+
+        :param other: HexCell
+        :return: HexCell
+        """
+
+        # update self
+        self.cubepos = CubeCoord(
+            self.cubepos[0] - other.cubepos[0],
+            self.cubepos[1] - other.cubepos[1],
+            self.cubepos[2] - other.cubepos[2]
+        )
+
+        self.pixel_pos = self.__cube_to_pixel__(self.layout, self.cubepos)
+
+        return self
 
     def __polygon_corner_offset__(self, layout, corner):
         """

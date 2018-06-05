@@ -31,9 +31,13 @@ class Shooter(pygame.sprite.Sprite):
         )
 
         # animation stuff
+        self._orig_img = pygame.transform.rotate(self.image, -self.angle)
+        self._orig_rect = self._orig_img.get_rect()
 
     def update(self, *args):
         super().update(*args)
+        self.image = pygame.transform.rotate(self._orig_img, self.angle)
+        self.rect = self.image.get_rect(center=self.rect.center)
 
     def kill(self):
         super().kill()
@@ -58,6 +62,7 @@ class Shooter(pygame.sprite.Sprite):
         """
 
         res = surface
+
         res.blit(self.image, self.rect.topleft)
 
         if DEBUG:
