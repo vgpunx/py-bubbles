@@ -115,18 +115,19 @@ def fire_test(playfield: Playfield, angle):
     # b_origin_pos[0] = int(b_origin_pos[0] + (playfield.get_surface().get_size()[0] / 2) - b_origin_pos[0])
 
     if not playfield.active_bubble.sprite:
-        fire = Bubble(
-            b_origin_cell,                                       # address
-            b_origin_pos,                                            # pixelpos
-            int(playfield.hexmap.cellsize[0] - 2),              # radius
-            'RED',                                              # fill_color
-            'BLACK',                                            # stroke_color
-            angle,                                              # angle
-            10,                                                 # velocity
-            (playfield.all_sprites, playfield.active_bubble)    # *groups
-        )
+        # fire = Bubble(
+        #     b_origin_cell,                                       # address
+        #     b_origin_pos,                                            # pixelpos
+        #     int(playfield.hexmap.cellsize[0] - 2),              # radius
+        #     'RED',                                              # fill_color
+        #     'BLACK',                                            # stroke_color
+        #     angle,                                              # angle
+        #     10,                                                 # velocity
+        #     (playfield.all_sprites, playfield.active_bubble)    # *groups
+        # )
         # playfield.active_bubble.add(fire)
         # playfield.all_sprites.add(fire)
+        playfield.shooter.fire(10, playfield.active_bubble)
 
 if __name__ == "__main__":
     main()

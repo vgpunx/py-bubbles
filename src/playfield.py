@@ -23,10 +23,17 @@ class Playfield:
         :type cell_size: Tuple(int, int)
         """
 
+        self.image = None
+        self.rect = None
+        self.area_params = None
+        self.hexmap = None
+        self.shooter = None
+        self.dbgsurf = None
+
         self.colorkey = 'WHITE'
 
         self.cell_size = cell_size
-        self.cell_radius = int(cell_size[0] - 2)  # this is a magic number, we'll get a better radius method in optimization
+        self.cell_radius = int(cell_size[0] - 2)  # this is a magic number just to accommodate drawn sprites
 
         # sprite groups
         self.all_sprites = pygame.sprite.Group()
@@ -37,13 +44,6 @@ class Playfield:
 
         # gamey stuff
         self.load_map(map_file_path)
-        self.shooter._generate_nextbubble(
-            self.hexmap.get_celladdressbypixel(self.shooter.rect.center),
-            self.shooter.rect.center,
-            self.cell_radius,
-            self.bubble_map,
-            (self.next_bubble, self.all_sprites)
-        )
 
     def update(self):
         self.image.fill(pygame.Color(self.colorkey))
@@ -53,20 +53,11 @@ class Playfield:
             self.image.blit(self.dbgsurf, (0, 0))
 
         self.all_sprites.update()
+        if self.shooter.next.sprite:
+            self.all_sprites.add(self.shooter.next.sprite)
 
         if self.active_bubble.sprite:
             self.process_collision()
-        else:
-            self.active_bubble.sprite = self.next_bubble.sprite
-            self.next_bubble.empty()
-
-            self.shooter._generate_nextbubble(
-                self.hexmap.get_celladdressbypixel(self.shooter.rect.center),
-                self.shooter.rect.center,
-                self.cell_radius,
-                self.bubble_map,
-                (self.next_bubble, self.all_sprites)
-            )
 
         # update and paint everything
         self.all_sprites.draw(self.image)
@@ -140,7 +131,7 @@ class Playfield:
 
         try:
             # reset affected properties
-            #debug
+            # debug
             if DEBUG:
                 print("Loading map...")
 
@@ -151,7 +142,14 @@ class Playfield:
 
             # shooter sprite
             # shooter_pos = self.rect.midbottom
-            self.shooter = Shooter((0,0), self.all_sprites)
+            self.shooter = Shooter(
+                (0, 0),
+                (-5, 15),
+                self.hexmap.get_pixeladdressbycell((-5, 15)),
+                self.cell_radius,
+                self.bubble_map,
+                self.all_sprites
+            )
             self.shooter.rect.midbottom = (self.rect.midbottom[0], self.rect.midbottom[1] - 20)
 
             # debug

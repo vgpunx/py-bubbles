@@ -7,7 +7,7 @@ from src.constants import *
 
 class Shooter(pygame.sprite.Sprite):
 
-    def __init__(self, position, *groups):
+    def __init__(self, position, bubble_origin_addr, bubble_origin_pos, bubble_radius, bubble_map, *groups):
         super().__init__(*groups)
         self.image = pygame.Surface((75, 75)).convert()  # temporary value
         self.rect = self.image.get_rect()
@@ -17,8 +17,13 @@ class Shooter(pygame.sprite.Sprite):
         self.angle = 90
         self.limits = (20, 160)
         self._rng = random.Random()
+        # TODO: remember to add to playfield spritegroups when changed
         self.next = pygame.sprite.GroupSingle()
-        self._generate_nextbubble(self.next)
+        # stored copy of bubble properties
+        self._bubble_origin_addr = bubble_origin_addr
+        self._bubble_origin_pos = bubble_origin_pos
+        self._bubble_radius = bubble_radius
+        self._bubble_map = bubble_map  # needed to access get_present_types()
 
         # placeholder image
         self.image.set_colorkey(pygame.Color('MAGENTA'))
@@ -43,7 +48,16 @@ class Shooter(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self._orig_img, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
 
-    def _generate_nextbubble(self, start_axial, start_pos, radius, bubble_map, *groups):
+        if not self.next.sprite:
+            self._generate_next(
+                self._bubble_origin_addr,
+                self._bubble_origin_pos,
+                self._bubble_radius,
+                self._bubble_map,
+                self.next
+            )
+
+    def _generate_next(self, start_axial, start_pos, radius, bubble_map, *groups):
         """
         Generates the next Bubble to be fired.  Weighted toward colors/types already present in map.
 
@@ -55,7 +69,7 @@ class Shooter(pygame.sprite.Sprite):
         """
 
         # probably that this will generate a color that is not currently already present in the map
-        rbc = 10
+        rbc = 5
 
         # colors present in map
         cpc = bubble_map.get_present_types()
@@ -90,9 +104,12 @@ class Shooter(pygame.sprite.Sprite):
                 *groups                     # *groups
             )
 
-    def fire(self, velocity):
+    def fire(self, velocity, *groups):
+        self.next.sprite.set_position(self._bubble_origin_addr, self.rect.center)
         self.next.sprite.set_velocity(velocity)
-        return self.next.sprite
+        self.next.sprite.set_angle(self.angle)
+        self.next.sprite.add(*groups)
+        self.next.empty()
 
     def kill(self):
         super().kill()
