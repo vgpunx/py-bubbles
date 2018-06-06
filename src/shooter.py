@@ -1,5 +1,6 @@
 import pygame, random
 from pygame.math import Vector2
+from src.bubble import Bubble
 from pygame.locals import *
 from src.constants import *
 
@@ -15,6 +16,9 @@ class Shooter(pygame.sprite.Sprite):
         # Unique shooter properties
         self.angle = 90
         self.limits = (20, 160)
+        self._rng = random.Random()
+        self.next = pygame.sprite.GroupSingle()
+        self._generate_nextbubble(self.next)
 
         # placeholder image
         self.image.set_colorkey(pygame.Color('MAGENTA'))
@@ -38,6 +42,57 @@ class Shooter(pygame.sprite.Sprite):
         super().update(*args)
         self.image = pygame.transform.rotate(self._orig_img, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
+
+    def _generate_nextbubble(self, start_axial, start_pos, radius, bubble_map, *groups):
+        """
+        Generates the next Bubble to be fired.  Weighted toward colors/types already present in map.
+
+        :type start_pos: tuple
+        :type start_axial: tuple
+        :type radius: int
+        :type bubble_map: src.bubblemap.BubbleMap
+        :return: None
+        """
+
+        # probably that this will generate a color that is not currently already present in the map
+        rbc = 10
+
+        # colors present in map
+        cpc = bubble_map.get_present_types()
+
+        # colors not present in map
+        diff = [item for item in ALL_TYPEPROPERTIES if item not in cpc]
+
+        # ran-dumb in
+        ri = self._rng.randint(0, 100)
+
+        if ri <= rbc:
+            Bubble(
+                start_axial,                # address
+                start_pos,                  # pixelpos
+                radius,                     # radius
+                self._rng.choice(diff),     # fill_color
+                'BLACK',                    # stroke_color
+                self.angle,                 # angle
+                0,                          # velocity
+                *groups                     # *groups
+            )
+
+        else:
+            Bubble(
+                start_axial,                # address
+                start_pos,                  # pixelpos
+                radius,                     # radius
+                self._rng.choice(cpc),      # fill_color
+                'BLACK',                    # stroke_color
+                self.angle,                 # angle
+                0,                          # velocity
+                *groups                     # *groups
+            )
+
+    def fire(self, velocity):
+        self.next.sprite.set_velocity(velocity)
+        return self.next.sprite
 
     def kill(self):
         super().kill()

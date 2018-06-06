@@ -114,7 +114,7 @@ def fire_test(playfield: Playfield, angle):
     b_origin_cell = playfield.hexmap.get_celladdressbypixel(b_origin_pos)
     # b_origin_pos[0] = int(b_origin_pos[0] + (playfield.get_surface().get_size()[0] / 2) - b_origin_pos[0])
 
-    if len(playfield.active_bubble) == 0:
+    if not playfield.active_bubble.sprite:
         fire = Bubble(
             b_origin_cell,                                       # address
             b_origin_pos,                                            # pixelpos

@@ -35,11 +35,15 @@ class Playfield:
         self.next_bubble = pygame.sprite.GroupSingle()
         self.disloc_bubbles = pygame.sprite.Group()
 
-        # chancey stuff
-        self._rng = Random()
-
+        # gamey stuff
         self.load_map(map_file_path)
-        self._generate_nextbubble(self.next_bubble)
+        self.shooter._generate_nextbubble(
+            self.hexmap.get_celladdressbypixel(self.shooter.rect.center),
+            self.shooter.rect.center,
+            self.cell_radius,
+            self.bubble_map,
+            (self.next_bubble, self.all_sprites)
+        )
 
     def update(self):
         self.image.fill(pygame.Color(self.colorkey))
@@ -50,58 +54,23 @@ class Playfield:
 
         self.all_sprites.update()
 
-        if self.active_bubble:
+        if self.active_bubble.sprite:
             self.process_collision()
-            self.active_bubble = self.next_bubble.sprite
-            self._generate_nextbubble(self.next_bubble, self.all_sprites)
+        else:
+            self.active_bubble.sprite = self.next_bubble.sprite
+            self.next_bubble.empty()
+
+            self.shooter._generate_nextbubble(
+                self.hexmap.get_celladdressbypixel(self.shooter.rect.center),
+                self.shooter.rect.center,
+                self.cell_radius,
+                self.bubble_map,
+                (self.next_bubble, self.all_sprites)
+            )
 
         # update and paint everything
         self.all_sprites.draw(self.image)
         self.shooter.draw(self.image)
-
-    def _generate_nextbubble(self, *groups):
-        """
-        Generates the next Bubble to be fired.  Weighted toward colors/types already present in map.
-
-        :param spriteGroup:
-        :return:
-        """
-
-        # probably that this will generate a color that is not currently already present in the map
-        rbc = 10
-
-        # colors present in map
-        cpc = self.bubble_map.get_present_types()
-
-        # colors not present in map
-        diff = [item for item in ALL_TYPEPROPERTIES if item not in cpc]
-
-        # ran-dumb in
-        ri = self._rng.randint(0, 100)
-
-        if ri <= rbc:
-            return Bubble(
-                self.hexmap.get_celladdressbypixel(self.shooter.rect.center),   # address
-                self.shooter.rect.center,                                       # pixelpos
-                self.cell_radius,                                               # radius
-                self._rng.choice(diff),                                         # fill_color
-                'BLACK',                                                        # stroke_color
-                self.shooter.angle,                                             # angle
-                0,                                                              # velocity
-                *groups                                                         # *groups
-            )
-
-        else:
-            return Bubble(
-                self.hexmap.get_celladdressbypixel(self.shooter.rect.center),   # address
-                self.shooter.rect.center,                                       # pixelpos
-                self.cell_radius,                                               # radius
-                self._rng.choice(cpc),                                          # fill_color
-                'BLACK',                                                        # stroke_color
-                self.shooter.angle,                                             # angle
-                0,                                                              # velocity
-                *groups                                                         # *groups
-            )
 
     def process_collision(self):
         mv = self.active_bubble.sprite
@@ -128,7 +97,7 @@ class Playfield:
                     if DEBUG:
                         print("I think I'm in cell {0}.".format(mv_cur_address))
 
-                    # validate cell exists
+                    # validate cell address index in range
                     c = 0
 
                     while mv_cur_address not in self.hexmap.board.keys():
@@ -139,9 +108,8 @@ class Playfield:
                             # we're on the left side
                             mv_cur_address = (mv_cur_address[0] + 1, mv_cur_address[1])
 
-                        # additional exit condition
-                        if c == 2:
-                            raise RuntimeWarning("Maximum iteration count {0} reached.".format(c))
+                        # infinite loops are bad, mmkay?
+                        assert c < 2, "Maximum iteration count {0} reached.".format(c)
 
                         c += 1
 
