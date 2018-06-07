@@ -85,9 +85,6 @@ class Playfield:
                     mv.set_position(mv.grid_address, mv.rect.clamp(self.rect).center)
                     mv_cur_address = self.hexmap.get_celladdressbypixel(mv.rect.center)
 
-                    if DEBUG:
-                        print("I think I'm in cell {0}.".format(mv_cur_address))
-
                     # validate cell address index in range
                     c = 0
 
@@ -104,7 +101,6 @@ class Playfield:
 
                         c += 1
 
-
                     mv.grid_address = mv_cur_address
                     dest_cell = self.hexmap.board.get(mv.grid_address)
 
@@ -115,9 +111,43 @@ class Playfield:
                     self.bubble_map.add(mv)
                     self.active_bubble.remove(mv)
 
+                    # testing floodfill
+                    matches = self._floodfill(mv, pygame.sprite.Group())
+                    if len(matches) >= 3:
+                        for sprite in matches:
+                            sprite.kill()
+                            self.bubble_map.remove(sprite)
+
                     return
 
                 continue
+
+        elif mv.rect.top > self.rect.bottom:
+            mv.kill()
+
+    def _floodfill(self, sprite, spritegroup):
+        """
+        Returns a group of touching sprites whose type_property match.
+
+        :type spritegroup: pygame.sprite.Group
+        :type sprite: Bubble
+        :return: pygame.sprite.Group
+        """
+
+        # get surrounding sprites
+        nbr_bubble_addr = []
+        for addr in self.hexmap.hex_allneighbors(sprite.grid_address):
+            if addr in self.bubble_map.sprite_dict_by_address.keys():
+                nbr_bubble_addr.append(addr)
+
+        for ax in nbr_bubble_addr:
+            b = self.bubble_map.get(ax)
+            if b.type_property == sprite.type_property and b not in spritegroup:
+                spritegroup.add(b)
+                sprite = b
+                self._floodfill(sprite, spritegroup)
+
+        return spritegroup
 
     def load_map(self, filepath):
         try:
