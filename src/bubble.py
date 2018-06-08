@@ -43,7 +43,6 @@ class Bubble(pygame.sprite.Sprite):
     def update(self, *args):
         super().update(*args)
         self.move(self.velocity)
-        # self.bounce()
 
     def draw(self):
         # placeholder code
@@ -53,8 +52,6 @@ class Bubble(pygame.sprite.Sprite):
         self.image.convert()
 
     def move(self, direction: pygame.math.Vector2):
-
-        # TODO: implement alive test
         self.pos += direction
         self.rect.center = self.pos
 

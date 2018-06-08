@@ -6,7 +6,6 @@ from pygame.locals import *
 
 
 def main():
-
     # initialize pygame
     pygame.init()
 
@@ -20,7 +19,7 @@ def main():
     # later, src.Playfield will handle this part
     test_bkg = pygame.image.load(os.path.join(BGI_PATH, 'test_bkg.jpg'))
 
-    #background = pygame.Surface(screen.get_size()).convert()
+    # background = pygame.Surface(screen.get_size()).convert()
     # background.fill(pygame.Color('blue'))
     background = pygame.transform.scale(test_bkg, DISP_SIZE).convert()
 
@@ -67,10 +66,7 @@ def main():
 
         # handle controls for debugging
         keys = pygame.key.get_pressed()
-        if keys[K_SPACE]:
-            fire_test(playfield, playfield.shooter.angle)
-
-        elif keys[K_a]:
+        if keys[K_a]:
             playfield.shooter.rotate(1)
 
         elif keys[K_d]:
@@ -80,18 +76,14 @@ def main():
         # this is where any graphical updates are blitted to the display
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                # stop music playback
+                # this will need to move later to the appropriate place based on design
+                pygame.mixer.music.stop()
                 return
 
-            # if event.type == pygame.KEYDOWN:
-            #     if event.key == pygame.K_SPACE:
-            #         fire_test(playfield, playfield.shooter.angle)
-            #
-            #     elif event.key == pygame.K_a:
-            #         playfield.shooter.rotate(2)
-            #
-            #     elif event.key == pygame.K_d:
-            #         playfield.shooter.rotate(-2)
-
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    playfield.shooter.fire(10, playfield.active_bubble)
 
         # update the display to show changes
         # in production, we will use "dirty rect" updating to improve performance
@@ -102,32 +94,8 @@ def main():
         # set framerate to no more than 60FPS
         clock.tick(60)
 
-    # stop music playback
-    # this will need to move later to the appropriate place based on design
-    pygame.mixer.music.stop()
-
     pygame.quit()
 
-
-def fire_test(playfield: Playfield, angle):
-    b_origin_pos = playfield.shooter.rect.center
-    b_origin_cell = playfield.hexmap.get_celladdressbypixel(b_origin_pos)
-    # b_origin_pos[0] = int(b_origin_pos[0] + (playfield.get_surface().get_size()[0] / 2) - b_origin_pos[0])
-
-    if not playfield.active_bubble.sprite:
-        # fire = Bubble(
-        #     b_origin_cell,                                       # address
-        #     b_origin_pos,                                            # pixelpos
-        #     int(playfield.hexmap.cellsize[0] - 2),              # radius
-        #     'RED',                                              # fill_color
-        #     'BLACK',                                            # stroke_color
-        #     angle,                                              # angle
-        #     10,                                                 # velocity
-        #     (playfield.all_sprites, playfield.active_bubble)    # *groups
-        # )
-        # playfield.active_bubble.add(fire)
-        # playfield.all_sprites.add(fire)
-        playfield.shooter.fire(10, playfield.active_bubble)
 
 if __name__ == "__main__":
     main()

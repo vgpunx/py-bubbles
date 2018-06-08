@@ -139,7 +139,7 @@ class Shooter(pygame.sprite.Sprite):
 
         if DEBUG:
             debug_text = pygame.font.Font(pygame.font.get_default_font(), 14).render(
-                "{0} deg".format(self.angle), True, pygame.Color("WHITE"))
+                "{0} deg".format(self.angle), True, pygame.Color("RED"))
 
             res.blit(debug_text, (self.rect.left + 18, self.rect.bottom - 20))
 

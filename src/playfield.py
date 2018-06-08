@@ -68,10 +68,14 @@ class Playfield:
 
         # check for boundary collision and bounce
         if mv.rect.top < 0:
+            #TODO: make bubbles stick to top
             mv.bounce(Vector2(1, 0))
             return
         elif mv.rect.left < 0 or mv.rect.right > self.rect.width:
             mv.bounce(Vector2(0, 1))
+            return
+        elif mv.rect.top > self.rect.bottom:
+            mv.kill()
             return
 
         collision_list = pygame.sprite.spritecollide(mv, self.bubble_map, False)
@@ -80,28 +84,15 @@ class Playfield:
             # keep going until circle collision
             for spr in collision_list:
                 if pygame.sprite.collide_circle(mv, spr):
-                    # the idea here is to slow down, find the direction to the nearest sprite,
-                    # and move the sprite until it touches at least two others
-                    mv.set_position(mv.grid_address, mv.rect.clamp(self.rect).center)
-                    mv_cur_address = self.hexmap.get_celladdressbypixel(mv.rect.center)
+                    new_pos = mv.rect.clamp(self.rect).center
+                    mv.set_position(
+                        self._validate_axial_addr(
+                            self.hexmap.get_celladdressbypixel(new_pos),
+                            self._get_shiftdir(mv)
+                        ),
+                        new_pos
+                    )
 
-                    # validate cell address index in range
-                    c = 0
-
-                    while mv_cur_address not in self.hexmap.board.keys():
-                        if self.rect.right - mv.rect.right > self.rect.left - mv.rect.left:
-                            # we're on the right side of the screen.
-                            mv_cur_address = (mv_cur_address[0] - 1, mv_cur_address[1])
-                        else:
-                            # we're on the left side
-                            mv_cur_address = (mv_cur_address[0] + 1, mv_cur_address[1])
-
-                        # infinite loops are bad, mmkay?
-                        assert c < 2, "Maximum iteration count {0} reached.".format(c)
-
-                        c += 1
-
-                    mv.grid_address = mv_cur_address
                     dest_cell = self.hexmap.board.get(mv.grid_address)
 
                     mv.set_velocity(0)
@@ -122,9 +113,6 @@ class Playfield:
 
                 continue
 
-        elif mv.rect.top > self.rect.bottom:
-            mv.kill()
-
     def _floodfill(self, sprite, spritegroup):
         """
         Returns a group of touching sprites whose type_property match.
@@ -134,11 +122,7 @@ class Playfield:
         :return: pygame.sprite.Group
         """
 
-        # get surrounding sprites
-        nbr_bubble_addr = []
-        for addr in self.hexmap.hex_allneighbors(sprite.grid_address):
-            if addr in self.bubble_map.sprite_dict_by_address.keys():
-                nbr_bubble_addr.append(addr)
+        nbr_bubble_addr = [addr for addr in self.hexmap.hex_allneighbors(sprite.grid_address) if addr in self.bubble_map.sprite_dict_by_address.keys()]
 
         for ax in nbr_bubble_addr:
             b = self.bubble_map.get(ax)
@@ -148,6 +132,37 @@ class Playfield:
                 self._floodfill(sprite, spritegroup)
 
         return spritegroup
+
+    def _validate_axial_addr(self, axial_addr, shift):
+        """
+        Validates a Bubble axial address is in range and corrects by shifting left
+        or right in the row.  This is intended to correct situations where the bubble
+        stops in a map void.
+        :param axial_addr: tuple
+        :param shift: int
+        :return:
+        """
+        c = 0
+
+        while axial_addr not in self.hexmap.board.keys():
+            axial_addr = (axial_addr[0] + shift, axial_addr[1])
+
+            # infinite loops are bad, mmkay?
+            assert c < 2, f"Maximum iteration count {c} reached."
+            c += 1
+
+        return axial_addr
+
+    def _get_shiftdir(self, sprite):
+        """
+        Returns +1 or -1 depending on which side of playfield centery the sprite is.
+        :param sprite: pygame.sprite.Sprite
+        :return: Boolean
+        """
+        if self.rect.centery < sprite.rect.centery:
+            return 1
+
+        return -1
 
     def load_map(self, filepath):
         try:

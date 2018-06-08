@@ -41,4 +41,4 @@ SPR_PATH = os.path.join(os.curdir, 'resource', 'image', 'sprites')
 ALL_TYPEPROPERTIES = ('RED', 'ORANGE', 'YELLOW', 'GREEN', 'BLUE', 'VIOLET', 'GRAY', 'WHITE')
 
 ## DEBUG MODE ##
-DEBUG = True
+DEBUG = False

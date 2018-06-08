@@ -18,14 +18,14 @@ class BubbleMap(Group):
         super().add(*sprites)
 
         for obj in sprites:
-            if obj not in self.sprite_dict_by_address:
+            if obj.grid_address not in self.sprite_dict_by_address:
                 self.sprite_dict_by_address[obj.grid_address] = obj
 
     def remove(self, *sprites):
         super().remove(*sprites)
 
         for obj in sprites:
-            if obj in self.sprite_dict_by_address:
+            if obj.grid_address in self.sprite_dict_by_address:
                 del self.sprite_dict_by_address[obj.grid_address]
 
     def empty(self):
