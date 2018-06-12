@@ -6,8 +6,10 @@ class Bubble(pygame.sprite.Sprite):
 
     def __init__(self, address, pos, radius, fill_color, stroke_color, angle=90, velocity=0, *groups):
         super().__init__(*groups)
-        self.image = pygame.Surface((radius * 2, radius * 2))
+        self.image = pygame.Surface((radius * 2, radius * 2)).convert()
         self.image.set_colorkey(pygame.Color('MAGENTA'))
+        self.background = pygame.Surface((radius * 2, radius * 2)).convert()
+        self.background.set_colorkey(pygame.Color('MAGENTA'))
         self.rect = self.image.get_rect(center=pos)
 
         # movement & location
@@ -15,14 +17,16 @@ class Bubble(pygame.sprite.Sprite):
         self.pos = Vector2(pos)
         self.angle = angle
         self.velocity = Vector2(1, 0).rotate(-self.angle) * velocity
-        # self.bounds = bounds
 
         # for drawing placeholder images
         # this will be replaced with actual image code later
         self.radius = radius
         self.fill = pygame.Color(fill_color)
         self.stroke = pygame.Color(stroke_color)
-        self.draw()
+        self.background.fill(pygame.Color('MAGENTA'))
+        self.image.fill(pygame.Color('MAGENTA'))
+        pygame.draw.circle(self.image, self.fill, self.image.get_rect().center, self.radius)  # filled cir
+        pygame.draw.circle(self.image, self.stroke, self.image.get_rect().center, self.radius, 2)  # stroke
 
         # game properties
         self.type_property = fill_color  # temporary value
@@ -44,12 +48,10 @@ class Bubble(pygame.sprite.Sprite):
         super().update(*args)
         self.move(self.velocity)
 
-    def draw(self):
-        # placeholder code
-        self.image.fill(pygame.Color('MAGENTA'))
-        pygame.draw.circle(self.image, self.fill, self.image.get_rect().center, self.radius)  # filled cir
-        pygame.draw.circle(self.image, self.stroke, self.image.get_rect().center, self.radius, 2)  # stroke
-        self.image.convert()
+    def draw(self, surface):
+        surface.blit(self.background, self.rect.topleft)
+        surface.blit(self.image, self.rect.topleft)
+        return surface
 
     def move(self, direction: pygame.math.Vector2):
         self.pos += direction

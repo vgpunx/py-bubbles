@@ -21,7 +21,7 @@ def main():
 
     # background = pygame.Surface(screen.get_size()).convert()
     # background.fill(pygame.Color('blue'))
-    background = pygame.transform.scale(test_bkg, DISP_SIZE).convert()
+    background = pygame.transform.scale(test_bkg, DISP_SIZE).convert_alpha()
 
     # load music
     # this may need to move or use a variable to integrate level music later

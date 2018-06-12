@@ -24,13 +24,14 @@ class Playfield:
         """
 
         self.image = None
+        self.background = None
         self.rect = None
         self.area_params = None
         self.hexmap = None
         self.shooter = None
         self.dbgsurf = None
 
-        self.colorkey = 'WHITE'
+        self.bg_color = (255, 255, 255, 150)
 
         self.cell_size = cell_size
         self.cell_radius = int(cell_size[0] - 2)  # this is a magic number just to accommodate drawn sprites
@@ -44,14 +45,16 @@ class Playfield:
 
         # gamey stuff
         self.load_map(map_file_path)
+        self.image.blit(self.background, self.rect.topleft)
 
     def update(self):
-        self.image.fill(pygame.Color(self.colorkey))
+        self.image.fill(pygame.Color(*self.bg_color))
 
         # debug
         if DEBUG:
-            self.image.blit(self.dbgsurf, (0, 0))
+            self.image.blit(self.dbgsurf, self.rect.topleft)
 
+        # self.all_sprites.clear(self.image, self.background)
         self.all_sprites.update()
         if self.shooter.next.sprite:
             self.all_sprites.add(self.shooter.next.sprite)
@@ -180,7 +183,9 @@ class Playfield:
             if DEBUG:
                 print("Loading map...")
 
-            self.image = pygame.Surface((map_width, map_height)).convert()
+            self.image = pygame.Surface((map_width, map_height)).convert_alpha()
+            self.background = pygame.Surface((map_width, map_height)).convert_alpha()
+            self.background.fill(pygame.Color(*self.bg_color))
             self.area_params = self.image.get_size()
             self.rect = self.image.get_rect()
             self.hexmap = HexMap(self.area_params, self.cell_size, hex_orientation='pointy')
@@ -201,7 +206,7 @@ class Playfield:
             if DEBUG:
                 print("Playfield dimensions: {0}".format(self.area_params))
                 self.dbgsurf = pygame.Surface(self.area_params)
-                self.dbgsurf.fill(pygame.Color(self.colorkey))
+                self.dbgsurf.fill(pygame.Color(self.bg_color))
                 self.dbgsurf.convert()
                 for cell in self.hexmap.board.values():
                     cell.paint(self.dbgsurf, color="grey")
