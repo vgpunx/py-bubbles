@@ -5,6 +5,7 @@ import pygame
 
 Point = collections.namedtuple("Point", ["x", "y"])
 CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
+Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
 
 
 # Definition of Orientation and Layout named tuples for reference only:
@@ -17,12 +18,24 @@ CubeCoord = collections.namedtuple("Hex", ["q", "r", "s"])
 
 class HexCell(object):
 
-    def __init__(self, axial_coords, layout) -> None:
+    def __init__(self, coords, layout) -> None:
         super().__init__()
-        self.Layout = collections.namedtuple("Layout", ["orientation", "size", "origin"])
-        self.axialpos = axial_coords
-        self.cubepos = CubeCoord(axial_coords.x, axial_coords.y, -axial_coords.x - axial_coords.y)
+
+        # support both coord types
+        if len(coords) == 2:
+            # axial coords
+            self.axialpos = coords
+            self.cubepos = CubeCoord(coords[0], coords[1], -coords[0] - coords[1])
+
+        elif len(coords) == 3:
+            self.cubepos = coords
+            self.axialpos = Point(coords[0], coords[1])
+
+        else:
+            raise ValueError("A Tuple with 2 (axial) or 3 (cube) elements is required for the coords parameter.")
+
         self.layout = layout
+        self.pixel_pos = self.__cube_to_pixel__(self.layout, self.cubepos)
 
     def get_pixelpos(self) -> Point:
         """
@@ -48,6 +61,75 @@ class HexCell(object):
 
         return corners
 
+    def __add__(self, other):
+        """
+        Addition (+) operator for hex cells.  This replaces hex_add and axial_add from hex_map.
+
+        :param other: HexCell
+        :return: HexCell
+        """
+        return HexCell(
+            CubeCoord(
+                self.cubepos.q + other.cubepos.q,
+                self.cubepos.r + other.cubepos.r,
+                self.cubepos.s + other.cubepos.s
+            ),
+            self.layout
+        )
+
+    def __iadd__(self, other):
+        """
+        Addition operator for hex cells that supports augmented arithmetic assignment (+=).
+        :param other:
+        :return:
+        """
+
+        # update self
+        self.cubepos = CubeCoord(
+            self.cubepos[0] + other.cubepos[0],
+            self.cubepos[1] + other.cubepos[1],
+            self.cubepos[2] + other.cubepos[2]
+        )
+
+        self.pixel_pos = self.__cube_to_pixel__(self.layout, self.cubepos)
+
+        return self
+
+    def __sub__(self, other):
+        """
+        Subtraction operator for hex cells.  This replaces hex_subtract and axial_subtract from hex_map.
+
+        :param other: HexCell
+        :return: HexCell
+        """
+        return HexCell(
+            CubeCoord(
+                self.cubepos.q - other.cubepos.q,
+                self.cubepos.r - other.cubepos.r,
+                self.cubepos.s - other.cubepos.s
+            ),
+            self.layout
+        )
+
+    def __isub__(self, other):
+        """
+        Subtraction operator for hex cells that supports augmented arithmetic assignment (-=).
+
+        :param other: HexCell
+        :return: HexCell
+        """
+
+        # update self
+        self.cubepos = CubeCoord(
+            self.cubepos[0] - other.cubepos[0],
+            self.cubepos[1] - other.cubepos[1],
+            self.cubepos[2] - other.cubepos[2]
+        )
+
+        self.pixel_pos = self.__cube_to_pixel__(self.layout, self.cubepos)
+
+        return self
+
     def __polygon_corner_offset__(self, layout, corner):
         """
         Calculate polygon corner offset from center.
@@ -61,8 +143,7 @@ class HexCell(object):
 
         return Point(size.x * math.cos(angle), size.y * math.sin(angle))
 
-    @staticmethod
-    def __cube_to_pixel__(layout, cubecoord):
+    def __cube_to_pixel__(self, layout, cubecoord):
         """
         Convert cube hex coordinates to pixel position.
         :param layout: Named tuple with 3 fields.
@@ -77,8 +158,7 @@ class HexCell(object):
 
         return Point(int(x + origin.x), int(y + origin.y))
 
-    @staticmethod
-    def __pixel_to_cube__(layout, pixel_coords):
+    def __pixel_to_cube__(self, layout, pixel_coords):
         """
         Convert pixel coordinates to hex cube position.
         :param layout:
@@ -92,7 +172,7 @@ class HexCell(object):
         q = M.b0 * pt.x + M.b1 * pt.y
         r = M.b2 * pt.x + M.b3 * pt.y
 
-        return CubeCoord(q, r, -q - r)
+        return CubeCoord(int(q), int(r), int(-q - r))
 
     def paint(self, surface, color='black', width=2) -> pygame.Surface:
         """
@@ -100,10 +180,8 @@ class HexCell(object):
         As currently written this is intended primarily for debugging.
         :surface: Pass in the object of class pygame.Surface to blit to.
         """
-
         pygame.draw.polygon(surface, pygame.Color(color), self.get_polygon_corners(self.layout, self.cubepos),
-            width
-        )
+                            width)
         font = pygame.font.Font(pygame.font.get_default_font(), 10)
         text = font.render('{0}, {1}'.format(self.axialpos.x, self.axialpos.y), False, pygame.Color("RED"))
         surface.blit(text, (self.get_pixelpos().x - (text.get_size()[0] / 2), self.get_pixelpos().y))
