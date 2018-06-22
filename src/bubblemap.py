@@ -1,5 +1,4 @@
 from pygame.sprite import Group, Sprite
-from bubble import Bubble
 
 
 class BubbleMap(Group):
