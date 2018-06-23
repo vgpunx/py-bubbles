@@ -3,6 +3,7 @@ from src.playfield import Playfield
 from src.bubble import Bubble
 from src.constants import *
 from pygame.locals import *
+from src.control import *
 
 
 def main():
@@ -43,6 +44,9 @@ def main():
 
     clock = pygame.time.Clock()
 
+    # Instantiating controls object (temporary/test)
+    control = Control()
+
     while True:
         # paste the background
         screen.blit(background, (0, 0))
@@ -65,12 +69,13 @@ def main():
             )
 
         # handle controls for debugging
-        keys = pygame.key.get_pressed()
-        if keys[K_a]:
-            playfield.shooter.rotate(1)
-
-        elif keys[K_d]:
-            playfield.shooter.rotate(-1)
+        control.process_keys()
+        # keys = pygame.key.get_pressed()
+        # if keys[K_a]:
+        #     playfield.shooter.rotate(1)
+        #
+        # elif keys[K_d]:
+        #     playfield.shooter.rotate(-1)
 
         # this is the event handler, which we should move to src.Control
         # this is where any graphical updates are blitted to the display
@@ -84,6 +89,11 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     playfield.shooter.fire(10, playfield.active_bubble)
+
+            if event.type == control.rotate_left:
+                playfield.shooter.rotate(1)
+            elif event.type == control.rotate_right:
+                playfield.shooter.rotate(-1)
 
         # update the display to show changes
         # in production, we will use "dirty rect" updating to improve performance
