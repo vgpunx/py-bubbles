@@ -10,8 +10,12 @@ class Control:
 
     def process_keys(self):
         keys = pygame.key.get_pressed()
+        # Left and right
         if keys[pygame.K_a]:
             pygame.event.post(pygame.event.Event(self.rotate_left))
-
         elif keys[pygame.K_d]:
             pygame.event.post(pygame.event.Event(self.rotate_right))
+
+        # Separate branch for shooting, so it can theoretically be done while rotating
+        if keys[pygame.K_SPACE]:
+            pygame.event.post(pygame.event.Event(self.shooty_doots))

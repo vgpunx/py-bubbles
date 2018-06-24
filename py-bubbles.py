@@ -70,12 +70,6 @@ def main():
 
         # handle controls for debugging
         control.process_keys()
-        # keys = pygame.key.get_pressed()
-        # if keys[K_a]:
-        #     playfield.shooter.rotate(1)
-        #
-        # elif keys[K_d]:
-        #     playfield.shooter.rotate(-1)
 
         # this is the event handler, which we should move to src.Control
         # this is where any graphical updates are blitted to the display
@@ -86,9 +80,12 @@ def main():
                 pygame.mixer.music.stop()
                 return
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    playfield.shooter.fire(10, playfield.active_bubble)
+            # if event.type == pygame.KEYDOWN:
+            #     if event.key == pygame.K_SPACE:
+            #         playfield.shooter.fire(10, playfield.active_bubble)
+
+            if event.type == control.shooty_doots:
+                playfield.shooter.fire(10, playfield.active_bubble)
 
             if event.type == control.rotate_left:
                 playfield.shooter.rotate(1)
