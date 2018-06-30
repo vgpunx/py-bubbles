@@ -82,14 +82,9 @@ class Game:
                     pygame.mixer.music.stop()
                     return
 
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
-                        if not self.playfield.active_bubble.sprite:
-                            self.playfield.shooter.fire(10, self.playfield.active_bubble)
-
-                # Test code
-                # if event.type == control.shooty_doots:
-                #     playfield.shooter.fire(10, playfield.active_bubble)
+                if event.type == self.control.shooty_doots:
+                    if not self.playfield.active_bubble.sprite:
+                        self.playfield.shooter.fire(10, self.playfield.active_bubble)
 
                 if event.type == self.control.rotate_left:
                     self.playfield.shooter.rotate(1)

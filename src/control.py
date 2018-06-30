@@ -17,6 +17,6 @@ class Control:
             pygame.event.post(pygame.event.Event(self.rotate_right))
 
         # Shooting code for test
-        # if keys[pygame.K_SPACE]:
-        #     pygame.event.post(pygame.event.Event(self.shooty_doots))
+        if keys[pygame.K_SPACE]:
+            pygame.event.post(pygame.event.Event(self.shooty_doots))
 
