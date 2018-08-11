@@ -82,7 +82,7 @@ class Game:
                     pygame.mixer.music.stop()
                     return
 
-                if event.type == self.control.shooty_doots:
+                if event.type == self.control.shooty_doots or event.type == pygame.JOYBUTTONDOWN:
                     if not self.playfield.active_bubble.sprite:
                         self.playfield.shooter.fire(10, self.playfield.active_bubble)
 
